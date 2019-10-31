@@ -1,4 +1,7 @@
 """A script that evaluates coference resolution on BioNLP 2011 training data"""
+from collections import namedtuple
+import re
+import pathlib
 
 """
 regarding matches:
@@ -8,10 +11,11 @@ regarding matches:
         - begin(detected mention)>=begin(maximal boundary) & end(detected mention)<=end(maximal boundary)
         - begin(detected mention)<=begin(minimal boundary) & end(detected mention)>=end(minimal boundary)   
 """
-# --------------------------------------------------
-# PSUEDO CODE 
-
-# Assuming out of of doc._coref_clusters...
+# -------------------------------------------------
+# namedtuple objects to reprent Clusters and Spans
+cluster = namedtuple('Cluster', ('ant_span_', 'anaph_span_'))
+span_ = namedtuple('Span', ('beg', 'end'))
+# -------------------------------------------------
 
 def commutative_pairing(cluster_list, strip_spacy_attrs=True):
     """ Takes a list of clusters and pairs them off commutatively.
@@ -25,8 +29,7 @@ def commutative_pairing(cluster_list, strip_spacy_attrs=True):
     """
     pass
 
-
-# convert word index to char index - SANITY CHECK
+# SANITY CHECK this after any changes are made!
 def word_to_char_indices(words_pair, container_text):
     """Extracts character index spans for a pair of words
     Current implementation only accepts type(word[0]) == str. 
@@ -39,54 +42,101 @@ def word_to_char_indices(words_pair, container_text):
     """
     pass
 
-# get corresponding a2 file 
-def get_true_mentions(f_path):
+
+def get_a2_file(a2_file):
     """ Takes full path to file of current abstract that is being processed and gets a2 file
     Args:
         f_path: Path to current file being processed
     Returns:
         str - Corresponding *.a2 
     """
-    pass
-    
-# slice relevant section from line containting beginning with R1 to end of doc
-def get_gold_coref_exps(a2_f_path):
-    """extracts relevant area of .a2 txt document containing coreferring expressions
-    Args:
-        a2_f_path: file path to a2 file 
-    Returns:
-        section of document containing coref expressions
-    """
-    pass
+    path = pathlib.Path(a2_file)
+    f_name = path.stem
+    a2_path = path.parent.joinpath(f'{f_name}.a2')
+    return a2_path
 
-# extract spans of expressions for each coref exp
-def get_coref_spans(coref_exp):
-    """Get pair clusters containing character indices from a coref_exp (BART format)
+
+def get_coref_spans(a2_file):
+    """Get pair clusters containing character indices from a2 file
     Args:
         coref_exp: a coreference expression, e.g. 'R3	Coref Anaphora:T19 Antecedent:T15'
     Returns:
         tuple of len == 2 where each entry is a character index span
     """
-    pass
-# where AD = Annotated Dataset and NCP= Neural Coref Predicitions
+    clusters = []
 
-# AD = True ---- NCP= Predicted
-# when comparing predicited vs true 
-# ----> have a function to detect atom links, ie Surface ->(T3,T2), (T2, T1) == Atom-> (T3,T1)
+    def get_term_spans(a2_reader):
+        term_spans = dict()
+        offset = 0 
+        for l in a2_reader:
+            span_obj = re.search(r'(T[0-9][0-9]?)\s*Exp\s*([0-9]{1,4}\s*[0-9]{1,4})', l)
+            if span_obj:
+                term = span_obj.group(1)
+                span_str = span_obj.group(2)
+                span_str_spli = span_str.split(' ')  # where begin span at i = 0 and end at i = 1 of span_str_split
+                term_spans[term] = span_(span_str_spli[0], span_str_spli[1])
+                offset += len(l)
+            else:
+                return term_spans, offset
+
+    with open(a2_file, 'r') as a2:
+        term_spans, offset = get_term_spans(a2)  # gets all term spans
+        a2.seek(0)   # a dumb way to backtrack one line 
+        a2.seek(offset)
+        for line in a2:  # reader picks up where term spans ended
+            if re.search(r'Coref Anaphora:', line):
+                anaph_t_m = re.search(r'(Coref Anaphora:)(T[0-9][0-9]?[0-9]?)', line)
+                anaph_t = anaph_t_m.group(2)
+                antecedent_t_m = re.search(r'(Antecedent:)(T[0-9][0-9]?[0-9]?)', line)
+                antecedent_t = antecedent_t_m.group(2)
+                ant_span = term_spans[antecedent_t]
+                anaph_span = term_spans[anaph_t]
+                c = cluster(ant_span, anaph_span)
+                clusters.append(c)
+    return clusters
+
+
+def atom_link_detector(pred_cluster, gold_clusters):
+    """Checks if predicted cluster is an atom link
+    Args:
+        pred_cluster: a single predicted cluster
+        gold_clusters: all gold clusters for a given doc
+    Returns:
+        True is atom link is found, otherwise False
+    """
+    pass
+
 
 # ----------------------------------------------------
-# get stuff to calculate metrics (prec, recall, f1)
+# Positive and Negatives
+def get_true_pos(pred_clusters, gold_clusters):
+    """Find all correct predictions
+    Returns:
+        Number of correct predicted coreference expressions
+    """
+    pass
 
-# for every prediction that is right = True Positive
 
 # for every incorrect predicition = False Positive 
+def get_false_pos(pred_clusters, gold_clusters):
+    """Find incorrect predictions
+    Returns:
+        Number of incorrect predicted coreference expressions
+    """
+    pass
+
 
 # for each prediction we did not get = False Negative 
+def get_false_neg(pred_clusters, gold_clusters):
+    """Find missed predictions
+    Returns:
+        Number of undetected coreference expressions 
+    """
+    pass
+
 
 # ----------------------------------------------------
-
-# ----------------------------------------------------
-# metrics
+# accuracy metrics
 def precision(true_pos, false_pos):
     """Calculates Precision metric scocre
     Args: 
@@ -97,6 +147,7 @@ def precision(true_pos, false_pos):
     """
     return true_pos/(true_pos+false_pos)
 
+
 def recall(true_pos, false_neg):
     """computes recall metric score
     Args:
@@ -106,6 +157,7 @@ def recall(true_pos, false_neg):
         recall metric score
     """
     return true_pos/(true_pos+false_neg)
+
 
 def f1(prec, rec):
     """ Calculate F1 score or Harmonic Mean
