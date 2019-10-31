@@ -2,3 +2,6 @@ venv/
 isolate.py
 models/
 neuralcoref/
+eval_data
+exploration.py
+spacy_explore.py

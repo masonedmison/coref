@@ -11,11 +11,7 @@ conllu==2.2
 cymem==2.0.2
 Cython==0.29.13
 docutils==0.15.2
-en-core-sci-md==0.2.3
-en-core-sci-sm==0.2.0
-en-core-web-md==2.1.0
-en-core-web-sm==2.1.0
-en-ner-jnlpba-md==0.2.3
+
 ez-setup==0.9
 idna==2.8
 importlib-metadata==0.23
@@ -23,7 +19,7 @@ jmespath==0.9.4
 joblib==0.14.0
 more-itertools==7.2.0
 murmurhash==1.0.2
--e git+https://github.com/huggingface/neuralcoref.git@3d12574a9e9474060d8bfbbe3fa8751e9738a3fa#egg=neuralcoref
+neuralcoref==4.0
 nmslib==1.7.3.6
 numpy==1.17.2
 packaging==19.2
