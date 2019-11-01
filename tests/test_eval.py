@@ -43,7 +43,7 @@ def test_cummutative_pairing1(neurcoref_226):  # bionlp_eval.commutative_pairing
     (clusters_lists[1][0], clusters_lists[1][5]) ] 
 
 
-def test_word_char_indices(neurcoref_226):
+def test_word_char_indices(neurcoref_226): # bionlp_eval.word_to_char_indices
     print('\n----------testing word to char indices---------------')
     nc_clusters = neurcoref_226._.coref_clusters
     print(nc_clusters)
@@ -55,25 +55,20 @@ def test_word_char_indices(neurcoref_226):
     # ensure that text in clusters == character indexing
     # c is a cluster(ant_span, anaph_span) object where span('beg', 'end')
     for cp in cp1:
-        # cs1 = word_to_char_indices(cp[0], neurcoref_226.text)
-        # cs2 = word_to_char_indices(cp[1], neurcoref_226.text)
         cs = word_to_char_indices(cp, neurcoref_226.text)  # returns cluster object with ant and beg span
-        print('TYPE FOR NC TEXT----', type(neurcoref_226.text))
-      
+    
         ant_ = cs.ant_span_
         anaph_ = cs.anaph_span_
-        print('CLUSTER CHECK', type(cs))
-        print('SPAN CHECK', type(ant_))
-        print('TYPE FOR ANT SPAN BEG OBJ----', type(ant_.beg))
+        ####
         # check return types 
         assert type(cs) == cluster
         assert type(ant_) == span_
         assert type(anaph_) == span_
-        
         assert type(ant_.beg) and type(ant_.end) == int
-
+        ####
+        ####
+        # check that char indices match up with output of spacy 
         assert neurcoref_226.text[ant_.beg: ant_.end] == cp[0].text  # once for ant (in commutative pair tuple)
         assert neurcoref_226.text[anaph_.beg: anaph_.end] == cp[1].text  # once for ant (in commutative pair tuple)
-
-    #  cp2 = commutative_pairing(clusters_lists[1])
+        ####
     
