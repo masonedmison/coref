@@ -1,4 +1,5 @@
-"""A script that evaluates coference resolution on BioNLP 2011 training data"""
+"""A script that evaluates coference resolution on BioNLP 2011 training data
+If any changes are made please run tests found in tests/test_eval.py"""
 from collections import namedtuple
 import re
 import pathlib
@@ -11,38 +12,50 @@ regarding matches:
         - begin(detected mention)>=begin(maximal boundary) & end(detected mention)<=end(maximal boundary)
         - begin(detected mention)<=begin(minimal boundary) & end(detected mention)>=end(minimal boundary)   
 """
-# -------------------------------------------------
-# namedtuple objects to reprent Clusters and Spans
+# -----------------named tuples--------------------------------
 cluster = namedtuple('Cluster', ('ant_span_', 'anaph_span_'))
 span_ = namedtuple('Span', ('beg', 'end'))
-# -------------------------------------------------
+# --------------------------------------------------------------
 
-def commutative_pairing(cluster_list, strip_spacy_attrs=True):
-    """ Takes a list of clusters and pairs them off commutatively.
+
+# -----------------functions specific to neural coref---------------
+def commutative_pairing(cluster_list):
+    """ Takes a list of clusters and pairs them off commutatively. This function expects a coref_clusters object (a list of clusters) that has been resolved by spacy
     e.g. [t1,t2,t3,t4] --> (t1,t2), (t1,t3), (t1,t4).
-    This function expects a coref_clusters object (a list of clusters) that has been resolved by spacy
     Args:
         cluster_list: a list of cluster resolved by Spacy
         strip_spacy_attrs: if True, strip spacy objects to text word representation only
     Returns:
-        list of tuples with len == 2 where members are SpaCY span objects or text depending on strip_spacy_attrs. 
+        list of tuples with len == 2 where members are SpaCY span objects. 
     """
-    pass
+    assert type(cluster_list) == list  # quick type check
+    
+    return [ (cluster_list[0], cluster_list[i]) for i in range(1, len(cluster_list)) ]
+
 
 # SANITY CHECK this after any changes are made!
 def word_to_char_indices(words_pair, container_text):
-    """Extracts character index spans for a pair of words
-    Current implementation only accepts type(word[0]) == str. 
+    """Extracts character index spans for a pair of mentions (spacy span objects)
     This function also drops the string value - keep this in mind for future development
     Args: 
         words_pair: word or phrase that to be convereted
         container_text: text where the word or phrase is contained in
     Returns:
-        tuple with each word as a character index span
+        namedtuple cluster  
     """
-    pass
+    s_b_str = words_pair[0].text
+    s_index_b = container_text.index(s_b_str)
+    ant_span = span_(s_index_b, s_index_b+len(s_b_str))  # ant span
+
+    s_e_str = words_pair[1].text
+    s_index_e = container_text.index(s_e_str)
+    anaph_span = span_(s_index_e, s_index_e+len(s_e_str))  # anaph span
+
+    return cluster(ant_span, anaph_span)
+# --------------------------------------------------------------------------
 
 
+# -----------------functions specific to bionlp dataset-------------
 def get_a2_file(a2_file):
     """ Takes full path to file of current abstract that is being processed and gets a2 file
     Args:
@@ -105,10 +118,9 @@ def atom_link_detector(pred_cluster, gold_clusters):
         True is atom link is found, otherwise False
     """
     pass
+# ------------------------------------------------------------------------
 
-
-# ----------------------------------------------------
-# Positive and Negatives
+# ----------------positive negative comparisons------------------------------------
 def get_true_pos(pred_clusters, gold_clusters):
     """Find all correct predictions
     Returns:
@@ -133,10 +145,10 @@ def get_false_neg(pred_clusters, gold_clusters):
         Number of undetected coreference expressions 
     """
     pass
+# ----------------------------------------------------------------------------------
 
 
-# ----------------------------------------------------
-# accuracy metrics
+# ----------------------accuracy metrics------------------------------
 def precision(true_pos, false_pos):
     """Calculates Precision metric scocre
     Args: 
@@ -168,4 +180,4 @@ def f1(prec, rec):
         f1 metric score
     """
     return 2 * (prec*rec)/(prec+rec)
-# ----------------------------------------------------
+# ------------------------------------------------------------------

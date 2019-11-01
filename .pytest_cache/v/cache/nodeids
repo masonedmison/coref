@@ -1,0 +1,4 @@
+[
+  "tests/test_eval.py::test_cummutative_pairing1",
+  "tests/test_eval.py::test_word_char_indices"
+]
