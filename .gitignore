@@ -3,5 +3,8 @@ isolate.py
 models/
 neuralcoref/
 eval_data
-exploration.py
+explorations.py
 spacy_explore.py
+.pytest_cache/v/pytest_cache/
+.vscode/
+__pycache__/
