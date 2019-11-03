@@ -3,6 +3,7 @@ If any changes are made please run tests found in tests/test_eval.py"""
 from collections import namedtuple
 import re
 import pathlib
+import os
 
 """
 regarding matches:
@@ -17,7 +18,7 @@ cluster = namedtuple('Cluster', ('ant_span_', 'anaph_span_'))
 span_ = namedtuple('Span', ('beg', 'end'))
 # --------------------------------------------------------------
 
-
+pos_neg_dict = dict(true_pos=0, false_pos=0, false_neg=0)
 # -----------------functions specific to neural coref---------------
 def commutative_pairing(cluster_list):
     """ Takes a list of clusters and pairs them off commutatively. This function expects a coref_clusters object (a list of clusters) that has been resolved by spacy
@@ -33,7 +34,6 @@ def commutative_pairing(cluster_list):
     return [ (cluster_list[0], cluster_list[i]) for i in range(1, len(cluster_list)) ]
 
 
-# SANITY CHECK this after any changes are made!
 def word_to_char_indices(words_pair, container_text):
     """Extracts character index spans for a pair of mentions (spacy span objects)
     This function also drops the string value - keep this in mind for future development
@@ -52,6 +52,24 @@ def word_to_char_indices(words_pair, container_text):
     anaph_span = span_(s_index_e, s_index_e+len(s_e_str))  # anaph span
 
     return cluster(ant_span, anaph_span)
+
+
+def coref_clusters_to_spans(coref_clusts, container_text):
+    """"Takes list of cluster objects and returns a list of cluster namedtuple objects where memebers are span_ objects
+    Note that this function more or less iterates over the coref_cluster object and passses each cluster through commutative pairing and word_to_char indices
+    Args:
+        coref_clusts: a list of clusts resolved by neural coref
+        container_text: abstract currently processed through nlp object
+    Returns:
+        set of cluster objects where members are span_ objects
+    """
+    char_span_clusters = set()
+    for cl_d in coref_clusts:
+        cp = commutative_pairing(cl_d.mentions)  
+        for c in cp:
+            char_span_cl = word_to_char_indices(c, container_text)
+            char_span_clusters.add(char_span_cl)
+    return char_span_clusters
 # --------------------------------------------------------------------------
 
 
@@ -70,13 +88,13 @@ def get_a2_file(a2_file):
 
 
 def get_coref_spans(a2_file):
-    """Get pair clusters containing character indices from a2 file
+    """Extracts coreferring expressions from a2 file with mention indices
     Args:
-        coref_exp: a coreference expression, e.g. 'R3	Coref Anaphora:T19 Antecedent:T15'
+        a2_file: path to a2_file 
     Returns:
-        tuple of len == 2 where each entry is a character index span
+        Set of clusters where members are cluster namedtuple objects
     """
-    clusters = []
+    clusters = set()
 
     def get_term_spans(a2_reader):
         term_spans = dict()
@@ -87,10 +105,12 @@ def get_coref_spans(a2_file):
                 term = span_obj.group(1)
                 span_str = span_obj.group(2)
                 span_str_spli = span_str.split(' ')  # where begin span at i = 0 and end at i = 1 of span_str_split
-                term_spans[term] = span_(span_str_spli[0], span_str_spli[1])
+                term_spans[term] = span_(int(span_str_spli[0]), int(span_str_spli[1]))
                 offset += len(l)
             else:
                 return term_spans, offset
+
+    if os.stat(a2_file).st_size == 0: return clusters  # if file is empty return an empty set
 
     with open(a2_file, 'r') as a2:
         term_spans, offset = get_term_spans(a2)  # gets all term spans
@@ -105,7 +125,7 @@ def get_coref_spans(a2_file):
                 ant_span = term_spans[antecedent_t]
                 anaph_span = term_spans[anaph_t]
                 c = cluster(ant_span, anaph_span)
-                clusters.append(c)
+                clusters.add(c)
     return clusters
 
 
@@ -118,15 +138,29 @@ def atom_link_detector(pred_cluster, gold_clusters):
         True is atom link is found, otherwise False
     """
     pass
+
+
+def within_min_span(pred_span, gold_span):
+    """Detect if predicited mention span meets the 'minumum span' len declared in annotated data
+    Args:
+        pred_span: predicted span
+        gold_span: mention span in annotated data
+    Returns:
+        True is span is within minimum span and False if is not
+    """
+    pass
 # ------------------------------------------------------------------------
 
-# ----------------positive negative comparisons------------------------------------
+# ----------------true positive negative comparisons------------------------------------
+""""both pred and gold clusters are a list of cluster objects where members are ant_span_ and anaph_span_ where span_ """
 def get_true_pos(pred_clusters, gold_clusters):
     """Find all correct predictions
     Returns:
         Number of correct predicted coreference expressions
     """
-    pass
+    assert type(pred_clusters) and type(gold_clusters) == set  # both args should be sets
+
+    return len(pred_clusters.intersection(gold_clusters))  # return length of members in both sets, ie true positives
 
 
 # for every incorrect predicition = False Positive 
@@ -135,7 +169,7 @@ def get_false_pos(pred_clusters, gold_clusters):
     Returns:
         Number of incorrect predicted coreference expressions
     """
-    pass
+    return len(pred_clusters.difference(gold_clusters))
 
 
 # for each prediction we did not get = False Negative 
@@ -144,7 +178,7 @@ def get_false_neg(pred_clusters, gold_clusters):
     Returns:
         Number of undetected coreference expressions 
     """
-    pass
+    return len(gold_clusters.difference(pred_clusters))
 # ----------------------------------------------------------------------------------
 
 

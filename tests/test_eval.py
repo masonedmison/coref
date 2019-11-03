@@ -2,7 +2,8 @@
 import pytest
 import spacy
 import neuralcoref
-from bionlp_eval import commutative_pairing, word_to_char_indices, cluster, span_
+from bionlp_eval import (commutative_pairing, word_to_char_indices, cluster, span_, get_coref_spans,
+coref_clusters_to_spans)
 
 
 @pytest.fixture(scope='session')
@@ -46,11 +47,9 @@ def test_cummutative_pairing1(neurcoref_226):  # bionlp_eval.commutative_pairing
 def test_word_char_indices(neurcoref_226): # bionlp_eval.word_to_char_indices
     print('\n----------testing word to char indices---------------')
     nc_clusters = neurcoref_226._.coref_clusters
-    print(nc_clusters)
     clusters_lists = _get_cluster_mentions(nc_clusters)
 
     cp1 = commutative_pairing(clusters_lists[0])
-    # csc1 = word_to_char_indices(csp1)  # char span clusters corresponding to cummative pairs
 
     # ensure that text in clusters == character indexing
     # c is a cluster(ant_span, anaph_span) object where span('beg', 'end')
@@ -71,4 +70,14 @@ def test_word_char_indices(neurcoref_226): # bionlp_eval.word_to_char_indices
         assert neurcoref_226.text[ant_.beg: ant_.end] == cp[0].text  # once for ant (in commutative pair tuple)
         assert neurcoref_226.text[anaph_.beg: anaph_.end] == cp[1].text  # once for ant (in commutative pair tuple)
         ####
-    
+
+def test_get_coref_spans():
+    print('\n-----------------testing get coref spans----------------------')
+    a2_spans1 = get_coref_spans('eval_data/train/PMID-1315834.a2')
+
+    assert a2_spans1 == {cluster(span_(560, 595), span_(597, 602)), cluster(span_(645, 679), span_(680, 685))}
+
+    # an empty a2 file
+    a2_spans2 = get_coref_spans('eval_data/train/PMID-2105946.a2')
+    assert a2_spans2 == set() # should return an empty set
+
