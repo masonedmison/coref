@@ -3,7 +3,7 @@ import pytest
 import spacy
 import neuralcoref
 from bionlp_eval import (commutative_pairing, word_to_char_indices, cluster, span_, get_coref_spans,
-coref_clusters_to_spans)
+coref_clusters_to_spans, atom_link_detector)
 
 
 @pytest.fixture(scope='session')
@@ -73,7 +73,7 @@ def test_word_char_indices(neurcoref_226): # bionlp_eval.word_to_char_indices
 
 def test_get_coref_spans():
     print('\n-----------------testing get coref spans----------------------')
-    a2_spans1 = get_coref_spans('eval_data/train/PMID-1315834.a2')
+    a2_spans1, _ = get_coref_spans('eval_data/train/PMID-1315834.a2')
 
     assert a2_spans1 == {cluster(span_(560, 595), span_(597, 602)), cluster(span_(645, 679), span_(680, 685))}
 
@@ -81,3 +81,54 @@ def test_get_coref_spans():
     a2_spans2 = get_coref_spans('eval_data/train/PMID-2105946.a2')
     assert a2_spans2 == set() # should return an empty set
 
+
+def test_min_spans():
+    print('\n------testing min spans within get_coref_spans()--------')
+    _, min_spans = get_coref_spans('eval_data/train/PMID-1372388.a2')
+
+    ####
+    # sample whole spans
+    ws1 = span_(101,137)  # T20
+    ws2 = span_(232, 286)  # T22
+    ws3 = span_(582, 601)   # T T24 
+    ws4 = span_(747, 786)   # T26
+    ws5 = span_(694, 697)
+    ####
+    # min spans
+    ms1 = span_(131, 137)
+    ms2 = span_(259, 286)
+    ms3 = span_(592, 601)
+    ms4 = span_(772, 786)
+    ####
+
+    assert min_spans[ws1] == ms1
+    assert min_spans[ws2] == ms2
+    assert min_spans[ws3] ==  ms3
+    assert min_spans[ws4] == ms4
+
+    assert min_spans[ws5] == None  # test for term with no min span
+
+
+def test_atom_link():
+    print('\n---------testing atom link detection-----------')
+    # surface links
+    sl1 = cluster(span_(224,226), span_(334,336))
+    sl2 = cluster(span_(334, 336), span_(444,446))
+    sl3 = cluster(span_(444,446), span_(554, 556))
+    sl4 = cluster(span_(554, 556), span_(664, 666))
+    sl5 = cluster(span_(333, 335), span_(553, 555))
+    sl_clusters1 = [sl1, sl2, sl3, sl4, sl5]
+    # atom links
+    al1 = cluster(span_(224,226), span_(444,446))
+    al2 = cluster(span_(224,226), span_(664,666))
+    # no atom link
+    nal1 = cluster(span_(333,335), span_(773, 775))
+    nal2 = cluster(span_(111,222), span_(888, 999))
+
+    assert atom_link_detector(al1, sl_clusters1) == True
+
+    assert atom_link_detector(al2, sl_clusters1) == True
+
+    assert atom_link_detector(nal1, sl_clusters1) == False
+
+    assert atom_link_detector(nal2, sl_clusters1) == False 

@@ -92,20 +92,30 @@ def get_coref_spans(a2_file):
     Args:
         a2_file: path to a2_file 
     Returns:
-        Set of clusters where members are cluster namedtuple objects
+        clusters: Set of clusters where members are cluster namedtuple objects and min_spans: min_spans look up
     """
     clusters = set()
+    min_spans = dict()  # where span_ object is mapped to it's minumum span (if any)
 
     def get_term_spans(a2_reader):
         term_spans = dict()
         offset = 0 
         for l in a2_reader:
-            span_obj = re.search(r'(T[0-9][0-9]?)\s*Exp\s*([0-9]{1,4}\s*[0-9]{1,4})', l)
-            if span_obj:
-                term = span_obj.group(1)
-                span_str = span_obj.group(2)
-                span_str_spli = span_str.split(' ')  # where begin span at i = 0 and end at i = 1 of span_str_split
-                term_spans[term] = span_(int(span_str_spli[0]), int(span_str_spli[1]))
+            l_spli = l.split('\t')
+            if 'T' in l_spli[0]:
+                ws_str = l_spli[1].replace('Exp', '').strip()
+                ws_spli = ws_str.split(' ')
+                ws = span_(int(ws_spli[0]), int(ws_spli[1]))
+                term_spans[l_spli[0]] = ws
+                #### 
+                # handle min span if any
+                if len(l_spli) == 5:
+                    ms_str = l_spli[3]
+                    ms_spli = ms_str.split(' ')
+                    min_spans[ws] = span_(int(ms_spli[0]), int(ms_spli[1]))
+                else:
+                    min_spans[ws] = None
+                ####
                 offset += len(l)
             else:
                 return term_spans, offset
@@ -126,18 +136,37 @@ def get_coref_spans(a2_file):
                 anaph_span = term_spans[anaph_t]
                 c = cluster(ant_span, anaph_span)
                 clusters.add(c)
-    return clusters
+    return clusters, min_spans
 
 
 def atom_link_detector(pred_cluster, gold_clusters):
     """Checks if predicted cluster is an atom link
+    A cluster is an atom link when (c1,c3) when defined coref expression exist in gold --> (c1,c2), (c2,c3) 
     Args:
         pred_cluster: a single predicted cluster
-        gold_clusters: all gold clusters for a given doc
+        gold_clusters: gold clusters for a given doc as iterable
     Returns:
-        True is atom link is found, otherwise False
+        True if atom link is found, otherwise False
     """
-    pass
+    # get gold cl matching match on ant
+    g = None
+    for cl in gold_clusters:
+        if cl.ant_span_ == pred_cluster.ant_span_:
+            g = cl
+            break
+
+    if g is None: 
+        return False  # if still None then no matching ant span was found
+
+    # search for links
+    l = g
+    for c in gold_clusters:
+        if l.anaph_span_ == c.ant_span_:
+            if pred_cluster == cluster(g.ant_span_, c.anaph_span_):
+                return True
+            else:
+                l = c
+    return False
 
 
 def within_min_span(pred_span, gold_span):
