@@ -85,7 +85,7 @@ def get_a2_file(curr_file):
     """
     path = pathlib.Path(curr_file)
     f_name = path.stem
-    a2_path = path.parent.joinpath(f'{f_name}.a2')
+    a2_path = path.parent.joinpath(f'{f_name.strip()}.a2')
     return a2_path
 
 
@@ -122,7 +122,7 @@ def get_coref_spans(a2_file):
             else:
                 return term_spans, offset
 
-    if os.stat(a2_file).st_size == 0: return clusters  # if file is empty return an empty set
+    if os.stat(a2_file).st_size == 0: return clusters, min_spans  # if file is empty return empty clusters and min_spans
 
     with open(a2_file, 'r') as a2:
         term_spans, offset = get_term_spans(a2)  # gets all term spans
@@ -232,6 +232,8 @@ def precision(true_pos, false_pos):
     Returns:
         precision metrics score
     """
+    if true_pos + false_pos == 0:
+        return 0  
     return true_pos/(true_pos+false_pos)
 
 
@@ -246,13 +248,13 @@ def recall(true_pos, false_neg):
     return true_pos/(true_pos+false_neg)
 
 
-def f1(prec, rec):
+def f1_(prec, rec):
     """ Calculate F1 score or Harmonic Mean
     Args:
         prec: precision score
         rec: recall score
     Returns:
-        f1 metric score
+        f1_ metric score
     """
     return 2 * (prec*rec)/(prec+rec)
 # ------------------------------------------------------------------

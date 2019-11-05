@@ -82,8 +82,10 @@ def test_get_coref_spans():
     assert a2_spans1 == {cluster(span_(560, 595), span_(597, 602)), cluster(span_(645, 679), span_(680, 685))}
 
     # an empty a2 file
-    a2_spans2 = get_coref_spans('eval_data/train/PMID-2105946.a2')
+    a2_spans2, _ = get_coref_spans('eval_data/train/PMID-2105946.a2')
     assert a2_spans2 == set() # should return an empty set
+
+    a2_spans3, _ = get_coref_spans('eval_data/train/PMID-1847170.txt')
 
 
 def test_min_spans():
