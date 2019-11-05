@@ -1,9 +1,10 @@
 """tests for the bionlp_eval.py scripts"""
+from functools import partial
 import pytest
 import spacy
 import neuralcoref
 from bionlp_eval import (commutative_pairing, word_to_char_indices, cluster, span_, get_coref_spans,
-coref_clusters_to_spans, atom_link_detector)
+coref_clusters_to_spans, atom_link_detector, within_min_span)
 
 
 @pytest.fixture(scope='session')
@@ -26,9 +27,11 @@ def neurcoref_226(set_up):
     f.close()
     return doc  # return spacy pipeline with neural coref
 
+
 def _get_cluster_mentions(coref_clusters):
     """helper to extract list of clusters from neuralcoref"""
     return [c.mentions for c in coref_clusters]
+
 
 def test_cummutative_pairing1(neurcoref_226):  # bionlp_eval.commutative_pairing
     print('---------testing commutative pairing---------------')
@@ -71,6 +74,7 @@ def test_word_char_indices(neurcoref_226): # bionlp_eval.word_to_char_indices
         assert neurcoref_226.text[anaph_.beg: anaph_.end] == cp[1].text  # once for ant (in commutative pair tuple)
         ####
 
+
 def test_get_coref_spans():
     print('\n-----------------testing get coref spans----------------------')
     a2_spans1, _ = get_coref_spans('eval_data/train/PMID-1315834.a2')
@@ -90,7 +94,7 @@ def test_min_spans():
     # sample whole spans
     ws1 = span_(101,137)  # T20
     ws2 = span_(232, 286)  # T22
-    ws3 = span_(582, 601)   # T T24 
+    ws3 = span_(582, 601)   # T24 
     ws4 = span_(747, 786)   # T26
     ws5 = span_(694, 697)
     ####
@@ -103,10 +107,10 @@ def test_min_spans():
 
     assert min_spans[ws1] == ms1
     assert min_spans[ws2] == ms2
-    assert min_spans[ws3] ==  ms3
+    assert min_spans[ws3] == ms3
     assert min_spans[ws4] == ms4
 
-    assert min_spans[ws5] == None  # test for term with no min span
+    assert min_spans[ws5] is None  # test for term with no min span
 
 
 def test_atom_link():
@@ -125,10 +129,41 @@ def test_atom_link():
     nal1 = cluster(span_(333,335), span_(773, 775))
     nal2 = cluster(span_(111,222), span_(888, 999))
 
-    assert atom_link_detector(al1, sl_clusters1) == True
+    assert atom_link_detector(al1, sl_clusters1) is True
 
-    assert atom_link_detector(al2, sl_clusters1) == True
+    assert atom_link_detector(al2, sl_clusters1) is True
 
-    assert atom_link_detector(nal1, sl_clusters1) == False
+    assert atom_link_detector(nal1, sl_clusters1) is False
 
-    assert atom_link_detector(nal2, sl_clusters1) == False 
+    assert atom_link_detector(nal2, sl_clusters1) is False
+
+
+def test_min_span_detecting():
+    print('\n------------testing min span detection-----------------')
+    ####
+    # span objects
+    g_span = span_(100, 150)
+    g_no_min = span_(400, 402)  # ensure no min is found, should always return False
+    m_span = span_(120, 135)
+    min_spans = {g_span: m_span, g_no_min:None}  # whole span maps to min span
+    # predicted spans
+    p_span1 = span_(115, 145)  # True
+    p_span2 = span_(120, 135)  # True
+    p_span3 = span_(122, 135)  # False
+    p_span4 = span_(120, 134)  # False
+    p_span5 = span_(110, 150)  # True
+    ####
+    
+    wms = partial(within_min_span, gold_span=g_span, min_spans=min_spans)
+
+    assert wms(p_span1) is True
+    assert wms(p_span2) is True
+    assert wms(p_span3) is False
+    assert wms(p_span4) is False
+    assert wms(p_span5) is True
+
+    assert within_min_span(p_span1, g_no_min, min_spans) is False
+    
+
+
+

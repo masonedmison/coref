@@ -1,18 +1,18 @@
 """A script that evaluates coference resolution on BioNLP 2011 training data
-If any changes are made please run tests found in tests/test_eval.py"""
-from collections import namedtuple
-import re
-import pathlib
-import os
-
-"""
+If any changes are made please run tests found in tests/test_eval.py
 regarding matches:
     (1) Exact match:
         - begin(detected mention)= begin(gold mention) & end(detected mention)= end(gold mention)
     (2) Partial match based on minimal and maximal boundaries of gold mentions:
         - begin(detected mention)>=begin(maximal boundary) & end(detected mention)<=end(maximal boundary)
-        - begin(detected mention)<=begin(minimal boundary) & end(detected mention)>=end(minimal boundary)   
+        - begin(detected mention)<=begin(minimal boundary) & end(detected mention)>=end(minimal boundary) 
 """
+from collections import namedtuple
+import re
+import pathlib
+import os
+
+
 # -----------------named tuples--------------------------------
 cluster = namedtuple('Cluster', ('ant_span_', 'anaph_span_'))
 span_ = namedtuple('Span', ('beg', 'end'))
@@ -169,19 +169,29 @@ def atom_link_detector(pred_cluster, gold_clusters):
     return False
 
 
-def within_min_span(pred_span, gold_span):
+def within_min_span(pred_span, gold_span, min_spans):
     """Detect if predicited mention span meets the 'minumum span' len declared in annotated data
     Args:
         pred_span: predicted span
         gold_span: mention span in annotated data
+        min_spans: dictionary that maps each whole span to it's min span. None val if no min span for mention
     Returns:
-        True is span is within minimum span and False if is not
+        True is span is within minimum span and False if not
     """
-    pass
+
+    m_span = min_spans[gold_span]
+    if m_span is None:
+        return False
+    # rules as defined in top level doc string
+    if pred_span.beg >= gold_span.beg and pred_span.end <= gold_span.end:
+        if pred_span.beg <= m_span.beg and pred_span.end >= m_span.end:
+            return True
+
+    return False
 # ------------------------------------------------------------------------
 
+
 # ----------------true positive negative comparisons------------------------------------
-""""both pred and gold clusters are a list of cluster objects where members are ant_span_ and anaph_span_ where span_ """
 def get_true_pos(pred_clusters, gold_clusters):
     """Find all correct predictions
     Returns:

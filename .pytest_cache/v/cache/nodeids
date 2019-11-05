@@ -3,5 +3,6 @@
   "tests/test_eval.py::test_word_char_indices",
   "tests/test_eval.py::test_get_coref_spans",
   "tests/test_eval.py::test_min_spans",
-  "tests/test_eval.py::test_atom_link"
+  "tests/test_eval.py::test_atom_link",
+  "tests/test_eval.py::test_min_span_detecting"
 ]
