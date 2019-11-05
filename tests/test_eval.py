@@ -4,7 +4,7 @@ import pytest
 import spacy
 import neuralcoref
 from bionlp_eval import (commutative_pairing, word_to_char_indices, cluster, span_, get_coref_spans,
-coref_clusters_to_spans, atom_link_detector, within_min_span)
+coref_clusters_to_spans, atom_link_detector, within_min_span, cluster_comparison)
 
 
 @pytest.fixture(scope='session')
@@ -138,23 +138,41 @@ def test_atom_link():
     assert atom_link_detector(nal2, sl_clusters1) is False
 
 
+####
+# span objects
+g_span1 = span_(100, 150)
+m_span1 = span_(120, 135)
+g_span2 = span_(150, 165)
+m_span2 = span_(154, 158)
+g_span3 = span_(180, 200)
+m_span3 = span_(182, 198)
+g_span4 = span_(210, 236)
+m_span4 = None
+g_span5 = span_(302,310)
+m_span5 = None
+g_span6 = span_(312, 320)
+m_span6 = span_(314,320)
+
+
+min_spans = {g_span1: m_span1, g_span2: m_span2, g_span3: m_span3, g_span4: m_span4,g_span5:m_span5, g_span6: m_span6}  # whole span maps to min span
+    
+# predicted spans
+p_span1 = span_(115, 145)  
+p_span2 = span_(120, 135)  # match on g span 1 
+p_span3 = span_(122, 135)  # match g_span1
+p_span4 = span_(120, 134)  # match g_span1 
+p_span5 = span_(110, 150)  # match g_span 1
+p_span6 = span_(182, 198)  # match g span 3
+p_span7 = span_(152, 164)  # match g span2
+p_span8 = span_(210, 236)  # match g span4
+p_span9 = span_(315, 320)  # match g span 6
+p_span10 = span_(400, 402)  # none
+####
+
+
 def test_min_span_detecting():
     print('\n------------testing min span detection-----------------')
-    ####
-    # span objects
-    g_span = span_(100, 150)
-    g_no_min = span_(400, 402)  # ensure no min is found, should always return False
-    m_span = span_(120, 135)
-    min_spans = {g_span: m_span, g_no_min:None}  # whole span maps to min span
-    # predicted spans
-    p_span1 = span_(115, 145)  # True
-    p_span2 = span_(120, 135)  # True
-    p_span3 = span_(122, 135)  # False
-    p_span4 = span_(120, 134)  # False
-    p_span5 = span_(110, 150)  # True
-    ####
-    
-    wms = partial(within_min_span, gold_span=g_span, min_spans=min_spans)
+    wms = partial(within_min_span, gold_span=g_span1, min_spans=min_spans)
 
     assert wms(p_span1) is True
     assert wms(p_span2) is True
@@ -162,8 +180,20 @@ def test_min_span_detecting():
     assert wms(p_span4) is False
     assert wms(p_span5) is True
 
-    assert within_min_span(p_span1, g_no_min, min_spans) is False
-    
 
+def test_cluster_comparison1():
+    print('\n---------------testing cluster comparision1-------------------')
+    pred_clusters = {cluster(p_span1, p_span7), cluster(p_span2, p_span6)}
+    gold_clusters = {cluster(g_span1, g_span2), cluster(g_span3, g_span4)}
 
+    # true positives = 1, false positives = 1, false negatives = 1 
 
+    assert cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=True) == dict(true_pos=1, false_pos=1, false_neg=1)
+
+def test_cluster_comparison2():
+    print('\n-------------- testing cluster comparsion2--------------------')
+    pred_clusters = {cluster(p_span2, p_span3), cluster(p_span7, p_span8), cluster(p_span3, p_span10), cluster(p_span10, p_span10)}  # no, yes, no, no 
+    gold_clusters = {cluster(g_span2, g_span3), cluster(g_span2, g_span4), cluster(g_span5, g_span6)}
+
+    # true pos = 1, false pos = 2, false neg = 2
+    assert cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=True) == dict(true_pos=1, false_pos=3, false_neg=2)

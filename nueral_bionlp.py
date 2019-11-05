@@ -3,6 +3,7 @@ import glob
 import os
 import spacy
 import neuralcoref
+from bionlp_eval import coref_clusters_to_spans, get_a2_file, get_coref_spans
 
 nlp = spacy.load('en_core_web_sm')
 neuralcoref.add_to_pipe(nlp)
@@ -18,9 +19,12 @@ def process_txt_files(txt_files):
         f_op = open(f, 'r', encoding='utf-8')
         f_str = f_op.read()
         f_op.close()
-        doc = nlp(f_str)
-
-        print('dummy output -- processed doc', f)
+        doc = nlp(f_str)    
+        # neural coref 
+        nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text)
+        # bionlp
+        a2_f = get_a2_file(f)
+        gold_clusts, min_spans = get_coref_spans(a2_f)  
 
 
 def main():

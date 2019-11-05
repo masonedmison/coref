@@ -20,11 +20,13 @@ span_ = namedtuple('Span', ('beg', 'end'))
 
 pos_neg_dict = dict(true_pos=0, false_pos=0, false_neg=0)
 # -----------------functions specific to neural coref---------------
+
+
 def commutative_pairing(cluster_list):
     """ Takes a list of clusters and pairs them off commutatively. This function expects a coref_clusters object (a list of clusters) that has been resolved by spacy
     e.g. [t1,t2,t3,t4] --> (t1,t2), (t1,t3), (t1,t4).
     Args:
-        cluster_list: a list of cluster resolved by Spacy
+        cluster_list: a list of cluster resolved by neural coref
         strip_spacy_attrs: if True, strip spacy objects to text word representation only
     Returns:
         list of tuples with len == 2 where members are SpaCY span objects. 
@@ -74,14 +76,14 @@ def coref_clusters_to_spans(coref_clusts, container_text):
 
 
 # -----------------functions specific to bionlp dataset-------------
-def get_a2_file(a2_file):
+def get_a2_file(curr_file):
     """ Takes full path to file of current abstract that is being processed and gets a2 file
     Args:
         f_path: Path to current file being processed
     Returns:
         str - Corresponding *.a2 
     """
-    path = pathlib.Path(a2_file)
+    path = pathlib.Path(curr_file)
     f_name = path.stem
     a2_path = path.parent.joinpath(f'{f_name}.a2')
     return a2_path
@@ -173,7 +175,7 @@ def within_min_span(pred_span, gold_span, min_spans):
     """Detect if predicited mention span meets the 'minumum span' len declared in annotated data
     Args:
         pred_span: predicted span
-        gold_span: mention span in annotated data
+        gold_span: gold span in annotated data
         min_spans: dictionary that maps each whole span to it's min span. None val if no min span for mention
     Returns:
         True is span is within minimum span and False if not
@@ -181,7 +183,7 @@ def within_min_span(pred_span, gold_span, min_spans):
 
     m_span = min_spans[gold_span]
     if m_span is None:
-        return False
+        m_span = gold_span 
     # rules as defined in top level doc string
     if pred_span.beg >= gold_span.beg and pred_span.end <= gold_span.end:
         if pred_span.beg <= m_span.beg and pred_span.end >= m_span.end:
@@ -253,4 +255,49 @@ def f1(prec, rec):
         f1 metric score
     """
     return 2 * (prec*rec)/(prec+rec)
+# ------------------------------------------------------------------
+
+
+# ---------------------comparison drivers---------------------------
+def min_span_bundle(pred_clust, gold_clusters, min_spans):
+    
+    for g_clust in gold_clusters:
+        if within_min_span(pred_clust.ant_span_, g_clust.ant_span_, min_spans) and within_min_span(pred_clust.anaph_span_, g_clust.anaph_span_, min_spans):
+            return g_clust
+    return None
+
+
+def cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=False):
+    """Compare predicted or detected mentions against annotated clusters in dataset for a single document
+    Args:
+        pred_clusters: clusters detected or resolved by neural coref
+        gold_clusters: clusters annotated in bionlp dataset
+    Returns:
+        Number of true positives, false positives, false negatives    
+    """
+    global pos_neg_dict
+    # for debugging purposes, set all dict values back to zero
+    if debug:
+        for k in pos_neg_dict:
+            pos_neg_dict.update({k:0})
+
+    pred_cl_copy = set(pred_clusters)
+    for pred_clust in pred_clusters:
+        if pred_clust in gold_clusters:
+            pos_neg_dict['true_pos'] += 1
+            continue
+        # minimum span check
+        min_span_ex = min_span_bundle(pred_clust, gold_clusters, min_spans)
+        if min_span_ex is not None:
+            pos_neg_dict['true_pos'] += 1
+            pred_cl_copy.remove(pred_clust)  # remove partial match and add gold clust matched on - we do this so we can do set difference for false positives
+            pred_cl_copy.add(min_span_ex)
+        else:  # no exact or partial match so false positive
+            pos_neg_dict['false_pos'] += 1
+
+    false_negs = len(gold_clusters.difference(pred_cl_copy))
+    pos_neg_dict['false_neg'] += false_negs
+
+    
+    return pos_neg_dict
 # ------------------------------------------------------------------
