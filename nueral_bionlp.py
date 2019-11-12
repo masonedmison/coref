@@ -6,7 +6,7 @@ import spacy
 import neuralcoref
 from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, cluster_comparison, f1_, precision, recall)
 
-nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load('en_core_web_md')
 neuralcoref.add_to_pipe(nlp)
 
 
@@ -15,7 +15,7 @@ def get_txt_files(path_to_files):
     return glob.iglob(os.path.join(path_to_files, '*.txt'))
 
 
-def calculate_metrics(pos_neg_dict):
+def calculate_metrics(pos_neg_dict, write_res=False):
     """calculates metrics and writes to txt file"""
     tp = pos_neg_dict['true_pos']
     fp = pos_neg_dict['false_pos']
@@ -26,14 +26,19 @@ def calculate_metrics(pos_neg_dict):
 
     f1 = f1_(prec, rec)
 
-    print('F1', f1)
-    print('\nPRECISION', prec)
-    print('\nRECALL', rec)
+    write_results(f1, prec, rec)
+
+def write_results(f1, precision, recall):
+    with open('bionlp_eval_results.txt', 'w') as out:
+        out.write('[ACCURACY METRICS]')
+        out.write(f'\n[F1] {f1*100}%')
+        out.write(f'\n[PRECISION] {precision*100}%')
+        out.write(f'\n[RECALL] {recall*100}%')
 
 
 def process_txt_files(txt_files):
     """takes an iterable containing paths txt files"""
-    for f in txt_files: 
+    for f in txt_files:
         logging.info(f'[PROCESSING FILE] {f}')
         f_op = open(f, 'r', encoding='utf-8')
         f_str = f_op.read()
@@ -41,7 +46,7 @@ def process_txt_files(txt_files):
         doc = nlp(f_str)
         # funky bug where files with 1 line throw a TypeError
         try:
-            # neural coref 
+            # neural coref
             nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text)
             # bionlp
             a2_f = get_a2_file(f)
@@ -54,7 +59,7 @@ def process_txt_files(txt_files):
         # comparison
         pos_neg_dict = cluster_comparison(nc_clusts, gold_clusts, min_spans)
         logging.info(f'[FINISHED PROCESSING FILE] {f}')
-    calculate_metrics(pos_neg_dict)
+    calculate_metrics(pos_neg_dict, write_res=True)
 
 
 def main():
@@ -65,11 +70,11 @@ def main():
 if __name__ == '__main__':
     logging.basicConfig(
      filename=f'log/bionlp_eval.log',
-     level=logging.INFO, 
+     level=logging.INFO,
      format= '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
      datefmt='%H:%M:%S'
  )
     logger = logging.getLogger('bionlp_eval')
     logger.setLevel(logging.DEBUG)
-    
+
     main()

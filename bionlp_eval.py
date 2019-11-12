@@ -5,7 +5,7 @@ regarding matches:
         - begin(detected mention)= begin(gold mention) & end(detected mention)= end(gold mention)
     (2) Partial match based on minimal and maximal boundaries of gold mentions:
         - begin(detected mention)>=begin(maximal boundary) & end(detected mention)<=end(maximal boundary)
-        - begin(detected mention)<=begin(minimal boundary) & end(detected mention)>=end(minimal boundary) 
+        - begin(detected mention)<=begin(minimal boundary) & end(detected mention)>=end(minimal boundary)
 """
 from collections import namedtuple
 import re
@@ -19,9 +19,9 @@ span_ = namedtuple('Span', ('beg', 'end'))
 # --------------------------------------------------------------
 
 pos_neg_dict = dict(true_pos=0, false_pos=0, false_neg=0)
+
+
 # -----------------functions specific to neural coref---------------
-
-
 def commutative_pairing(cluster_list):
     """ Takes a list of clusters and pairs them off commutatively. This function expects a coref_clusters object (a list of clusters) that has been resolved by spacy
     e.g. [t1,t2,t3,t4] --> (t1,t2), (t1,t3), (t1,t4).
@@ -29,21 +29,21 @@ def commutative_pairing(cluster_list):
         cluster_list: a list of cluster resolved by neural coref
         strip_spacy_attrs: if True, strip spacy objects to text word representation only
     Returns:
-        list of tuples with len == 2 where members are SpaCY span objects. 
+        list of tuples with len == 2 where members are SpaCY span objects.
     """
     assert type(cluster_list) == list  # quick type check
-    
+
     return [ (cluster_list[0], cluster_list[i]) for i in range(1, len(cluster_list)) ]
 
 
 def word_to_char_indices(words_pair, container_text):
     """Extracts character index spans for a pair of mentions (spacy span objects)
     This function also drops the string value - keep this in mind for future development
-    Args: 
+    Args:
         words_pair: word or phrase that to be convereted
         container_text: text where the word or phrase is contained in
     Returns:
-        namedtuple cluster  
+        namedtuple cluster
     """
     s_b_str = words_pair[0].text
     s_index_b = container_text.index(s_b_str)
@@ -67,7 +67,8 @@ def coref_clusters_to_spans(coref_clusts, container_text):
     """
     char_span_clusters = set()
     for cl_d in coref_clusts:
-        cp = commutative_pairing(cl_d.mentions)  
+        cp = commutative_pairing(cl_d.mentions)
+        cp = prune_same_form(cp)  # prune list of all mentions that are of same form
         for c in cp:
             char_span_cl = word_to_char_indices(c, container_text)
             char_span_clusters.add(char_span_cl)
@@ -81,7 +82,7 @@ def get_a2_file(curr_file):
     Args:
         f_path: Path to current file being processed
     Returns:
-        str - Corresponding *.a2 
+        str - Corresponding *.a2
     """
     path = pathlib.Path(curr_file)
     f_name = path.stem
@@ -92,7 +93,7 @@ def get_a2_file(curr_file):
 def get_coref_spans(a2_file):
     """Extracts coreferring expressions from a2 file with mention indices
     Args:
-        a2_file: path to a2_file 
+        a2_file: path to a2_file
     Returns:
         clusters: Set of clusters where members are cluster namedtuple objects and min_spans: min_spans look up
     """
@@ -101,7 +102,7 @@ def get_coref_spans(a2_file):
 
     def get_term_spans(a2_reader):
         term_spans = dict()
-        offset = 0 
+        offset = 0
         for l in a2_reader:
             l_spli = l.split('\t')
             if 'T' in l_spli[0]:
@@ -143,21 +144,20 @@ def get_coref_spans(a2_file):
 
 def atom_link_detector(pred_cluster, gold_clusters):
     """Checks if predicted cluster is an atom link
-    A cluster is an atom link when (c1,c3) when defined coref expression exist in gold --> (c1,c2), (c2,c3) 
+    A cluster is an atom link when (c1,c3) when defined coref expression exist in gold --> (c1,c2), (c2,c3)
     Args:
         pred_cluster: a single predicted cluster
         gold_clusters: gold clusters for a given doc as iterable
     Returns:
         True if atom link is found, otherwise False
     """
-    # get gold cl matching match on ant
     g = None
     for cl in gold_clusters:
         if cl.ant_span_ == pred_cluster.ant_span_:
             g = cl
             break
 
-    if g is None: 
+    if g is None:
         return False  # if still None then no matching ant span was found
 
     # search for links
@@ -183,7 +183,7 @@ def within_min_span(pred_span, gold_span, min_spans):
 
     m_span = min_spans[gold_span]
     if m_span is None:
-        m_span = gold_span 
+        m_span = gold_span
     # rules as defined in top level doc string
     if pred_span.beg >= gold_span.beg and pred_span.end <= gold_span.end:
         if pred_span.beg <= m_span.beg and pred_span.end >= m_span.end:
@@ -193,47 +193,40 @@ def within_min_span(pred_span, gold_span, min_spans):
 # ------------------------------------------------------------------------
 
 
-# ----------------true positive negative comparisons------------------------------------
-def get_true_pos(pred_clusters, gold_clusters):
-    """Find all correct predictions
-    Returns:
-        Number of correct predicted coreference expressions
-    """
-    assert type(pred_clusters) and type(gold_clusters) == set  # both args should be sets
-
-    return len(pred_clusters.intersection(gold_clusters))  # return length of members in both sets, ie true positives
-
-
-# for every incorrect predicition = False Positive 
-def get_false_pos(pred_clusters, gold_clusters):
-    """Find incorrect predictions
-    Returns:
-        Number of incorrect predicted coreference expressions
-    """
-    return len(pred_clusters.difference(gold_clusters))
-
-
-# for each prediction we did not get = False Negative 
-def get_false_neg(pred_clusters, gold_clusters):
-    """Find missed predictions
-    Returns:
-        Number of undetected coreference expressions 
-    """
-    return len(gold_clusters.difference(pred_clusters))
-# ----------------------------------------------------------------------------------
+# ---------------------general functions----------------------------------
+def prune_same_form(clusts):
+    """prune clusters that have the same literal form
+    Args:
+        clust: list of Spacy mentions OR a tuple - types checked before processing if conducted
+    Return:
+        pruned clusts
+        ...
+        """
+    if type(clusts) is list:  #  if list, incoming from predicted (neural coref) 
+        prune_copy = clusts.copy()
+        for cl in clusts:
+            if cl[0].text.lower() == cl[1].text.lower():
+                prune_copy.remove(cl)
+        return prune_copy
+    elif type(clusts) is tuple:  # if clusts of type tuple - it is incoming from gold
+        if clusts[0].text.lower() == clusts[1].text.lower():
+            return None
+        else:
+            return clusts
+# ------------------------------------------------------------------------
 
 
 # ----------------------accuracy metrics------------------------------
 def precision(true_pos, false_pos):
     """Calculates Precision metric scocre
-    Args: 
+    Args:
         true_pos: Correct predictions according Gold
         false_pos: predicted positives that are no in Gold
     Returns:
         precision metrics score
     """
     if true_pos + false_pos == 0:
-        return 0  
+        return 0
     return true_pos/(true_pos+false_pos)
 
 
@@ -256,13 +249,13 @@ def f1_(prec, rec):
     Returns:
         f1_ metric score
     """
-    return 2 * (prec*rec)/(prec+rec)
+    return 2 * ((prec*rec)/(prec+rec))
 # ------------------------------------------------------------------
 
 
 # ---------------------comparison drivers---------------------------
 def min_span_bundle(pred_clust, gold_clusters, min_spans):
-    
+    """takes a single predicted cluster and checks if both clusters may exist within the minumum spans of all of the gold clusters"""
     for g_clust in gold_clusters:
         if within_min_span(pred_clust.ant_span_, g_clust.ant_span_, min_spans) and within_min_span(pred_clust.anaph_span_, g_clust.anaph_span_, min_spans):
             return g_clust
@@ -275,14 +268,14 @@ def cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=False):
         pred_clusters: clusters detected or resolved by neural coref
         gold_clusters: clusters annotated in bionlp dataset
     Returns:
-        Number of true positives, false positives, false negatives    
+        Number of true positives, false positives, false negatives
     """
     global pos_neg_dict
     # for debugging purposes, set all dict values back to zero
     if debug:
         for k in pos_neg_dict:
             pos_neg_dict.update({k:0})
-
+    ####
     pred_cl_copy = set(pred_clusters)
     for pred_clust in pred_clusters:
         if pred_clust in gold_clusters:
@@ -294,12 +287,18 @@ def cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=False):
             pos_neg_dict['true_pos'] += 1
             pred_cl_copy.remove(pred_clust)  # remove partial match and add gold clust matched on - we do this so we can do set difference for false positives
             pred_cl_copy.add(min_span_ex)
+            continue  # kick out so we don't run atom_link_detection
+        # atom link detection
+        has_atom_link = atom_link_detector(pred_clust, gold_clusters)
+        if has_atom_link:
+            pos_neg_dict['true_pos'] += 1
+            pos_neg_dict['false_neg'] -= 1  # blindly subtract one since atom link will not be considered in difference of gold and pred sets
         else:  # no exact or partial match so false positive
             pos_neg_dict['false_pos'] += 1
 
     false_negs = len(gold_clusters.difference(pred_cl_copy))
     pos_neg_dict['false_neg'] += false_negs
 
-    
+
     return pos_neg_dict
 # ------------------------------------------------------------------
