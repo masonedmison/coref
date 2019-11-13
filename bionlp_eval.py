@@ -7,7 +7,7 @@ regarding matches:
         - begin(detected mention)>=begin(maximal boundary) & end(detected mention)<=end(maximal boundary)
         - begin(detected mention)<=begin(minimal boundary) & end(detected mention)>=end(minimal boundary)
 """
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import re
 import pathlib
 import os
@@ -101,32 +101,51 @@ def get_coref_spans(a2_file):
     min_spans = dict()  # where span_ object is mapped to it's minumum span (if any)
 
     def get_term_spans(a2_reader):
+        """create term span and term literal book keeping data structures
+        Returns:
+            term_spans: dict of form <term>: <max_term_span>
+            term_literals: dict of form <term>:(max_literal, min_literal)
+            offset: length of last line processed -- used to backtrack one line
+            """
         term_spans = dict()
+        term_literals = defaultdict(list) 
         offset = 0
         for l in a2_reader:
-            l_spli = l.split('\t')
-            if 'T' in l_spli[0]:
+            l_spli = l.split('\t')  # file is tab-delimited 
+            if 'T' in l_spli[0]:  # check if curr line is declaring Terms, e.g. T12
                 ws_str = l_spli[1].replace('Exp', '').strip()
                 ws_spli = ws_str.split(' ')
+                term = l_spli[0]
                 ws = span_(int(ws_spli[0]), int(ws_spli[1]))
-                term_spans[l_spli[0]] = ws
+                # update bookeping structures
+                term_spans[term] = ws              
+                term_literals[term].append(l_spli[2])  # add max literal form
                 #### 
                 # handle min span if any
                 if len(l_spli) == 5:
                     ms_str = l_spli[3]
                     ms_spli = ms_str.split(' ')
                     min_spans[ws] = span_(int(ms_spli[0]), int(ms_spli[1]))
+                    term_literals[term].append(l_spli[4])  # add min literal form
                 else:
                     min_spans[ws] = None
                 ####
                 offset += len(l)
             else:
-                return term_spans, offset
+                return term_spans, term_literals, offset
+    
+    def prune_same_literal(ant_s, anaph_s):
+        """return boolean if literal form is found within minumum or maximum or each potential cluster"""
+        for lit1 in term_literals[ant_s]:
+            for lit2 in term_literals[anaph_s]:
+                if lit1 == lit2:
+                    return True
+        return False            
 
     if os.stat(a2_file).st_size == 0: return clusters, min_spans  # if file is empty return empty clusters and min_spans
 
     with open(a2_file, 'r') as a2:
-        term_spans, offset = get_term_spans(a2)  # gets all term spans
+        term_spans, term_literals, offset = get_term_spans(a2)  # gets all term spans
         a2.seek(0)   # a dumb way to backtrack one line 
         a2.seek(offset)
         for line in a2:  # reader picks up where term spans ended
@@ -137,6 +156,10 @@ def get_coref_spans(a2_file):
                 antecedent_t = antecedent_t_m.group(2)
                 ant_span = term_spans[antecedent_t]
                 anaph_span = term_spans[anaph_t]
+                # check if literal forms are the same (max or min span) - we prune if literal forms are the same
+                # check here ...
+                if prune_same_literal(ant_t, anaph_t):
+                    continue  # move along little doggy
                 c = cluster(ant_span, anaph_span)
                 clusters.add(c)
     return clusters, min_spans

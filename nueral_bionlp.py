@@ -8,7 +8,7 @@ from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, 
 
 ####
 # change model as needed
-nlp = spacy.load('en_core_sci_lg')
+nlp = spacy.load('en_core_web_md')
 ####
 neuralcoref.add_to_pipe(nlp)
 
@@ -18,7 +18,7 @@ def get_txt_files(path_to_files):
     return glob.iglob(os.path.join(path_to_files, '*.txt'))
 
 
-def calculate_metrics(pos_neg_dict, write_res=False):
+def calculate_metrics(pos_neg_dict, pred_gold_totals, write_res=False):
     """calculates metrics and writes to txt file"""
     tp = pos_neg_dict['true_pos']
     fp = pos_neg_dict['false_pos']
@@ -29,18 +29,28 @@ def calculate_metrics(pos_neg_dict, write_res=False):
 
     f1 = f1_(prec, rec)
 
-    write_results(f1, prec, rec)
+    if write_res:
+        write_results(f1, prec, rec, pred_gold_totals, pos_neg_dict)
 
-def write_results(f1, precision, recall):
-    with open('scispacy_bionlp_eval_results.txt', 'w') as out:
+
+def write_results(f1, precision, recall, pred_gold_totals, pos_neg_dict):
+    with open('md_spacy_bionlp_eval_results.txt', 'w') as out:
         out.write('[ACCURACY METRICS]')
         out.write(f'\n[F1] {f1*100}%')
         out.write(f'\n[PRECISION] {precision*100}%')
         out.write(f'\n[RECALL] {recall*100}%')
+        # total clusters generated
+        out.write(f'\n[TOTAL PREDICTED CLUSTERS] {pred_gold_totals[0]}')
+        out.write(f'\n[TOTAL GOLD CLUSTERS] {pred_gold_totals[1]}')
+        out.write(f'\n[TRUE POSITIVES] {pos_neg_dict["true_pos"]}') 
+        out.write(f'\n[FALSE POSITIVES] {pos_neg_dict["false_pos"]}') 
+        out.write(f'\n[FALSE NEGATIVES] {pos_neg_dict["false_neg"]}')
 
 
 def process_txt_files(txt_files):
     """takes an iterable containing paths txt files"""
+    total_pred = 0
+    total_gold = 0
     for f in txt_files:
         logging.info(f'[PROCESSING FILE] {f}')
         f_op = open(f, 'r', encoding='utf-8')
@@ -49,24 +59,27 @@ def process_txt_files(txt_files):
         doc = nlp(f_str)
         # funky bug where files with 1 line throw a TypeError
         try:
-            # neural coref
-            nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text)
-            # bionlp
-            a2_f = get_a2_file(f)
-            gold_clusts, min_spans = get_coref_spans(a2_f)
+            nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text) # neural coref
+            a2_f = get_a2_file(f)  # get corresponding annotated file 
+            gold_clusts, min_spans = get_coref_spans(a2_f)  # bionlp
         except TypeError as te:
             logging.warn(te)
             logging.warn(f'[FILE SKIPPED] {f}')
             print(f'[FILE SKIPPED] {f}')
-            pass
+            continue  # muddle about - dont process anyting else in this loop
         # comparison
-        pos_neg_dict = cluster_comparison(nc_clusts, gold_clusts, min_spans)
+        pos_neg_dict = cluster_comparison(nc_clusts, gold_clusts, min_spans)  # get positive negatives
+        # keep track of total
+        total_pred += len(nc_clusts)
+        total_gold += len(gold_clusts)
+        ####
         logging.info(f'[FINISHED PROCESSING FILE] {f}')
-    calculate_metrics(pos_neg_dict, write_res=True)
+    pred_gold_totals = (total_pred, total_gold)
+    calculate_metrics(pos_neg_dict, pred_gold_totals, write_res=True)
 
 
 def main():
-    txt_it = get_txt_files('eval_data/train')
+    txt_it = get_txt_files('eval_data/train')  # iterator over all txt files in dir
     process_txt_files(txt_it)
 
 
