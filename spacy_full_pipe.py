@@ -6,7 +6,7 @@ from utils import (get_random_batch, get_str_from_file)
 
 
 # instantiate spacy and add neuralcoref to pipeline
-nlp = spacy.load('en_core_sci_md')
+nlp = spacy.load('en_core_sci_lg')
 neuralcoref.add_to_pipe(nlp)
 
 batch = get_random_batch(n=20)  # get n random pubmed abstracts
@@ -37,5 +37,5 @@ def misc_inpect(doc_):
 
 
 ner_inspect(doc)
-misc_inpect(doc)
-    
+# misc_inpect(doc)
+print(doc._.coref_clusters)    
