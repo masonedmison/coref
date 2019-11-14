@@ -1,1 +1,3 @@
-{}
+{
+  "tests/test_eval.py::test_prune_gold2": true
+}

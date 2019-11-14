@@ -6,5 +6,7 @@
   "tests/test_eval.py::test_atom_link",
   "tests/test_eval.py::test_min_span_detecting",
   "tests/test_eval.py::test_cluster_comparison1",
-  "tests/test_eval.py::test_cluster_comparison2"
+  "tests/test_eval.py::test_cluster_comparison2",
+  "tests/test_eval.py::test_prune_gold1",
+  "tests/test_eval.py::test_prune_gold2"
 ]

@@ -199,3 +199,21 @@ def test_cluster_comparison2():
 
     # true pos = 1, false pos = 2, false neg = 2
     assert cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=True) == dict(true_pos=1, false_pos=3, false_neg=2)
+
+
+def test_prune_gold1():
+    print('----testing that duplicate literal forms are pruned from gold-----')
+    # a2 file containg duplicate literal form of These genes, these genes
+    dup_a2 = '/home/medmison690/pyprojects/coref/eval_data/train/PMID-2234062.a2'
+
+    gold_clusts, _ = get_coref_spans(dup_a2)
+
+    assert cluster(span_(717,726), span_(918,927)) not in gold_clusts 
+
+
+# def test_prune_gold2():
+
+#     dup_a2 = '/home/medmison690/pyprojects/coref/tests/files/prune2.a2'
+#     gold_clusts, _ = get_coref_spans(dup_a2)
+
+#     assert cluster(span_(101,137), span_(138,143)) not in gold_clusts

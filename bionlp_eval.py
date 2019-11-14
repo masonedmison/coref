@@ -56,6 +56,21 @@ def word_to_char_indices(words_pair, container_text):
     return cluster(ant_span, anaph_span)
 
 
+def prune_same_form(clusts):
+    """prune clusters that have the same literal form
+    Args:
+        clust: list of Spacy mentions OR a tuple - types checked before processing if conducted
+    Return:
+        pruned clusts
+        ...
+        """
+    prune_copy = clusts.copy()
+    for cl in clusts:
+        if cl[0].text.lower().strip() == cl[1].text.lower().strip():
+            prune_copy.remove(cl)
+    return prune_copy
+
+
 def coref_clusters_to_spans(coref_clusts, container_text):
     """"Takes list of cluster objects and returns a list of cluster namedtuple objects where memebers are span_ objects
     Note that this function more or less iterates over the coref_cluster object and passses each cluster through commutative pairing and word_to_char indices
@@ -126,7 +141,7 @@ def get_coref_spans(a2_file):
                     ms_str = l_spli[3]
                     ms_spli = ms_str.split(' ')
                     min_spans[ws] = span_(int(ms_spli[0]), int(ms_spli[1]))
-                    term_literals[term].append(l_spli[4])  # add min literal form
+                    # term_literals[term].append(l_spli[4])  # add min literal form
                 else:
                     min_spans[ws] = None
                 ####
@@ -138,7 +153,7 @@ def get_coref_spans(a2_file):
         """return boolean if literal form is found within minumum or maximum or each potential cluster"""
         for lit1 in term_literals[ant_s]:
             for lit2 in term_literals[anaph_s]:
-                if lit1 == lit2:
+                if lit1.lower().strip() == lit2.lower().strip():
                     return True
         return False            
 
@@ -158,7 +173,7 @@ def get_coref_spans(a2_file):
                 anaph_span = term_spans[anaph_t]
                 # check if literal forms are the same (max or min span) - we prune if literal forms are the same
                 # check here ...
-                if prune_same_literal(ant_t, anaph_t):
+                if prune_same_literal(antecedent_t, anaph_t):
                     continue  # move along little doggy
                 c = cluster(ant_span, anaph_span)
                 clusters.add(c)
@@ -213,29 +228,6 @@ def within_min_span(pred_span, gold_span, min_spans):
             return True
 
     return False
-# ------------------------------------------------------------------------
-
-
-# ---------------------general functions----------------------------------
-def prune_same_form(clusts):
-    """prune clusters that have the same literal form
-    Args:
-        clust: list of Spacy mentions OR a tuple - types checked before processing if conducted
-    Return:
-        pruned clusts
-        ...
-        """
-    if type(clusts) is list:  #  if list, incoming from predicted (neural coref) 
-        prune_copy = clusts.copy()
-        for cl in clusts:
-            if cl[0].text.lower() == cl[1].text.lower():
-                prune_copy.remove(cl)
-        return prune_copy
-    elif type(clusts) is tuple:  # if clusts of type tuple - it is incoming from gold
-        if clusts[0].text.lower() == clusts[1].text.lower():
-            return None
-        else:
-            return clusts
 # ------------------------------------------------------------------------
 
 

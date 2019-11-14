@@ -1,0 +1,4 @@
+# Result codes
+# multiple codes are seperated by '//'
+
+Predicted duplicate literal forms pruned: lfp//

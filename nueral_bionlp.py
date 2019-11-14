@@ -8,7 +8,7 @@ from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, 
 
 ####
 # change model as needed
-nlp = spacy.load('en_core_web_md')
+nlp = spacy.load('en_core_sci_md')
 ####
 neuralcoref.add_to_pipe(nlp)
 
@@ -34,7 +34,7 @@ def calculate_metrics(pos_neg_dict, pred_gold_totals, write_res=False):
 
 
 def write_results(f1, precision, recall, pred_gold_totals, pos_neg_dict):
-    with open('md_spacy_bionlp_eval_results.txt', 'w') as out:
+    with open('md_scispacy_bionlp_eval_results.txt', 'w') as out:
         out.write('[ACCURACY METRICS]')
         out.write(f'\n[F1] {f1*100}%')
         out.write(f'\n[PRECISION] {precision*100}%')
