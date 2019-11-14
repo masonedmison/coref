@@ -1,4 +1,17 @@
 # Result codes
-# multiple codes are seperated by '//'
 
-Predicted duplicate literal forms pruned: lfp//
+[Base Naming Conventions]
+results files are in the form of:
+<model_size>_<pipline/module>_<codes>.txt
+    e.g. md_scispacy_alg_plfp_glfpma
+
+-- multiple codes are seperated by '_'
+
+[Codes]
+[Duplicate Literal Forms]
+Predicted duplicate literal forms pruned: plfp
+Gold duplicate literal forms pruned (max span only): glfpma
+Gold duplicate literal forms pruned (max&min span): glfpmami
+
+[Link Distribution]
+atom links in gold clusters: alg

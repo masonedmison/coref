@@ -6,22 +6,34 @@ import neuralcoref
 from bionlp_eval import (commutative_pairing, word_to_char_indices, cluster, span_, get_coref_spans,
 coref_clusters_to_spans, atom_link_detector, within_min_span, cluster_comparison)
 
+MODEL = 'en_core_web_md'  # change model as desired here
+
 
 @pytest.fixture(scope='session')
 def set_up():
     """load in md spacy model. add neuralcoref to pipe"""
     print('\n--------------set up-----------------')
     print('\nloading spacy model - this may take a minute or so')
-    nlp = spacy.load('en_core_web_md')
+    nlp = spacy.load(MODEL)
     neuralcoref.add_to_pipe(nlp, greedyness=0.5)
     print('\n-------------finished set up----------')
     return nlp
 
 
 @pytest.fixture(scope='module')
-def neurcoref_226(set_up):
-    """return doc object of pubmed abstract 1313226"""
-    f = open('/home/medmison690/pyprojects/coref/eval_data/train/PMID-1313226.txt')
+def neurcoref_068(set_up):
+    """return doc object of pubmed abstract 9712068"""
+    f = open('/home/medmison690/pyprojects/coref/eval_data/train/PMID-9712068.txt')
+    f_str = f.read()  # read the thing into as str
+    doc = set_up(f_str)
+    f.close()
+    return doc  # return spacy pipeline with neural coref
+
+
+@pytest.fixture(scope='module')
+def neurcoref_022(set_up):
+    """return doc object of pubmed abstract 8663022"""
+    f = open('/home/medmison690/pyprojects/coref/eval_data/train/PMID-8663022.txt')
     f_str = f.read()  # read the thing into as str
     doc = set_up(f_str)
     f.close()
@@ -192,6 +204,7 @@ def test_cluster_comparison1():
 
     assert cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=True) == dict(true_pos=1, false_pos=1, false_neg=1)
 
+
 def test_cluster_comparison2():
     print('\n-------------- testing cluster comparsion2--------------------')
     pred_clusters = {cluster(p_span2, p_span3), cluster(p_span7, p_span8), cluster(p_span3, p_span10), cluster(p_span10, p_span10)}  # no, yes, no, no 
@@ -217,3 +230,12 @@ def test_prune_gold1():
 #     gold_clusts, _ = get_coref_spans(dup_a2)
 
 #     assert cluster(span_(101,137), span_(138,143)) not in gold_clusts
+
+
+# def test_001(neurcoref_068):
+#     print('-----testing cluster detection comparsion on single abs------')
+#     p_clusts = neurcoref_068._.coref_clusters
+#     p_clust_spans = coref_clusters_to_spans(p_clusts, neurcoref_068.text) 
+
+#     gold_clust_spans, _ = get_coref_spans('eval_data/train/PMID-9712068.a2')
+    
