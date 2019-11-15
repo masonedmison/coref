@@ -1,5 +1,5 @@
 # Word Vector and NER Improvements  
-
+> Currently running NeuralCoref from local copy with `ENTITY` added to `ACCEPTED_ENTS`
 ## SciSpacy 
 ### As Full Pipeline
 #### Pros:
@@ -30,8 +30,21 @@ ACCEPTED_ENTS = ["PERSON", "NORP", "FACILITY", "ORG", "GPE", "LOC", "PRODUCT", "
 
 ##########################################################
 ```
-### Isolated SciSpacy Word Vectors
 
+### Possible SpaCy moves:
+- Rule based matching - Entity Ruler <https://spacy.io/usage/rule-based-matching#entityruler>
+    - use ontologies to create jsonld file to annotate genes/ proteins -- add patterns to Entity Ruler
+- Entity Linking? More research needed... 
+
+### Isolated SciSpacy Word Vectors
+- Looks as thought neural coref DOES use word vectors within spacy, if not given as **cfg_inference 'conv_dict'=val
+    - review spacy code and documentation to see how we could integrate other vectors in (ElMO, BioWordVec, BioBert, etc.)
 ### Isolated NER Module
 
 ## BioWordVec
+
+## possible neural coref
+
+## TODO
+- experiment with NER SciSpacy models (which are NER models trained on top of other models, e.g. md_core_sci_md) 
+
