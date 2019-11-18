@@ -39,11 +39,6 @@ ACCEPTED_ENTS = ["PERSON", "NORP", "FACILITY", "ORG", "GPE", "LOC", "PRODUCT", "
 ### Isolated SciSpacy Word Vectors
 - Looks as thought neural coref DOES use word vectors within spacy, if not given as **cfg_inference 'conv_dict'=val
     - review spacy code and documentation to see how we could integrate other vectors in (ElMO, BioWordVec, BioBert, etc.)
-### Isolated NER Module
-
-## BioWordVec
-
-## possible neural coref
 
 ## TODO
 - experiment with NER SciSpacy models (which are NER models trained on top of other models, e.g. md_core_sci_md) 
