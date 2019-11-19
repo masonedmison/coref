@@ -46,11 +46,11 @@ def word_to_char_indices(words_pair, container_text):
         namedtuple cluster
     """
     s_b_str = words_pair[0].text
-    s_index_b = container_text.index(s_b_str)
+    s_index_b = words_pair[0].start_char 
     ant_span = span_(s_index_b, s_index_b+len(s_b_str))  # ant span
 
     s_e_str = words_pair[1].text
-    s_index_e = container_text.index(s_e_str)
+    s_index_e =  words_pair[1].start_char
     anaph_span = span_(s_index_e, s_index_e+len(s_e_str))  # anaph span
 
     return cluster(ant_span, anaph_span)

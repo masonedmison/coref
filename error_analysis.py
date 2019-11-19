@@ -43,7 +43,7 @@ def process_txt_files(txt_files):
             print(f'[FILE SKIPPED] {f}')
             continue  # muddle about - dont process anyting else in this loop
         # comparison
-        pos_neg_dict = cluster_comparison(nc_clusts, gold_clusts, min_spans)  # get positive negatives
+        pos_neg_dict = cluster_comparison(nc_clusts, gold_clusts, min_spans, debug=True)  # get positive negatives
 
         # keep track of total
         # total_pred += len(nc_clusts)

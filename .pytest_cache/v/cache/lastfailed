@@ -2,6 +2,5 @@
   "tests/test_eval.py::test001": true,
   "tests/test_eval.py::test_001": true,
   "tests/test_eval.py::test_cummutative_pairing1": true,
-  "tests/test_eval.py::test_prune_gold2": true,
-  "tests/test_eval.py::test_word_char_indices": true
+  "tests/test_eval.py::test_prune_gold2": true
 }
