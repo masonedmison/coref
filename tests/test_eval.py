@@ -139,6 +139,7 @@ def test_atom_link():
     # atom links
     al1 = cluster(span_(224,226), span_(444,446))
     al2 = cluster(span_(224,226), span_(664,666))
+    al3 = cluster(span_(334,336), span_(554,556))
     # no atom link
     nal1 = cluster(span_(333,335), span_(773, 775))
     nal2 = cluster(span_(111,222), span_(888, 999))
