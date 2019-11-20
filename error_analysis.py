@@ -26,8 +26,6 @@ writer = pd.ExcelWriter(f'results/error_analysis/EA_{datetime.now()}.xlsx', engi
 
 def process_txt_files(txt_files):
     """takes an iterable containing paths txt files"""
-    # total_pred = 0
-    # total_gold = 0
     for f in txt_files:
         print(f'[PROCESSING FILE] {f}')
         f_op = open(f, 'r', encoding='utf-8')
@@ -44,14 +42,13 @@ def process_txt_files(txt_files):
             continue  # muddle about - dont process anyting else in this loop
         # comparison
         pos_neg_dict = cluster_comparison(nc_clusts, gold_clusts, min_spans, debug=True)  # get positive negatives
-
-        # keep track of total
-        # total_pred += len(nc_clusts)
-        # total_gold += len(gold_clusts)
         ####
         print(f'[FINISHED PROCESSING FILE] {f}')
+        # get literal forms for series of clusters
+        nc_lits = get_lit_forms(nc_clusts, f_str)
+        gold_lits = get_lit_forms(gold_clusts, f_str)
         # put together dict
-        d = dict(pred=list(nc_clusts), gold= list(gold_clusts))
+        d = dict(pred=list(nc_clusts), pred_lit=nc_lits, gold=list(gold_clusts), gold_lits=gold_lits)
         d.update(pos_neg_dict)
     # serialize res
         add_data(d, f)
@@ -61,6 +58,17 @@ def process_txt_files(txt_files):
 def add_data(d, f_name):
     df = pd.DataFrame(dict([ (k, pd.Series(v)) for k,v in d.items() ]))
     df.to_excel(writer, sheet_name=f_name.split('/')[-1])
+
+
+def get_lit_forms(clusters, container_text):
+    """takes list of clusters, returns list of literal form clusters"""
+    lit_l = []
+    for cl in clusters:
+        # get ant lit
+        ant_lit = container_text[cl.ant_span_.beg : cl.ant_span_.end]
+        anaph_lit = container_text[cl.anaph_span_.beg : cl.anaph_span_.end] 
+        lit_l.append((ant_lit, anaph_lit))
+    return lit_l
 
 
 if __name__ == '__main__':
