@@ -7,8 +7,7 @@ from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, 
 from utils import get_random_batch, get_str_from_file
 
 # modify model and codes used here
-MODEL = 'en_core_sci_md'
-CODES = 'alg_plfp_glfpma'  # seperated by '_' -- see results/res_codes.txt
+MODEL = 'en_core_web_md'
 ####
 
 ####
@@ -16,7 +15,8 @@ CODES = 'alg_plfp_glfpma'  # seperated by '_' -- see results/res_codes.txt
 nlp = spacy.load(MODEL)
 # nlp.add_pipe(nlp.create_pipe('sentencizer'))
 ####
-neuralcoref.add_to_pipe(nlp)
+coref = neuralcoref.NeuralCoref(nlp.vocab)
+nlp.add_pipe(coref, name='neuralcoref')
 
 f_batch = get_random_batch(n=20)
 
@@ -32,6 +32,9 @@ def process_txt_files(txt_files):
         f_str = f_op.read()
         f_op.close()
         doc = nlp(f_str)
+        # see mentions
+        pred_ents = [e.text for e in doc.ents]  
+        ####
         # funky bug where files with 1 line throw a TypeError
         try:
             nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text) # neural coref
@@ -50,6 +53,7 @@ def process_txt_files(txt_files):
         # put together dict
         d = dict(pred=list(nc_clusts), pred_lit=nc_lits, gold=list(gold_clusts), gold_lits=gold_lits)
         d.update(pos_neg_dict)
+        d.update(pred_ents=pred_ents)
     # serialize res
         add_data(d, f)
     writer.save()
