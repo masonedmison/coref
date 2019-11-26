@@ -21,35 +21,37 @@ def ants_anaph_end_char(doc):
         ant_to_end[ant] = []
         for i in range(1, len(clusts)):
             w = cl_list[i]
-            ant_to_end[ant].append(w.start_char + len(w)) 
+            ant_to_end[ant].append(w.end_char) 
         ant_to_end[ant].sort()  # sort when breaks out of loop
     return ant_to_end
 
 
-def get_max_i(k_to_ints):
-    if not bool(k_to_ints):
+def get_max_i():
+    global ant_to_end_c
+    if not bool(ant_to_end_c):
         return None, None
-    k_to_ints = sorted(k_to_ints.items(), key=lambda x: x[1][-1], reverse=True)
-    k_to_ints = OrderedDict(k_to_ints) 
-    f_key = list(k_to_ints.keys())[0]
-    ret_val = k_to_ints[f_key][-1] 
-    k_to_ints[f_key].remove(ret_val)
-    if not bool(k_to_ints[f_key]):
-        del k_to_ints[f_key]
+    ant_to_end_c = sorted(ant_to_end_c.items(), key=lambda x: x[1][-1], reverse=True)
+    ant_to_end_c = OrderedDict(ant_to_end_c) 
+    f_key = list(ant_to_end_c.keys())[0]
+    ret_val = ant_to_end_c[f_key][-1] 
+    ant_to_end_c[f_key].remove(ret_val)
+    if not bool(ant_to_end_c[f_key]):
+        del ant_to_end_c[f_key]
     return f_key, ret_val
 
 
-def annotate_txt(txt, ant_to_anaph):
+def annotate_txt(txt):
     # check if ant_to_anpah is empty
-    if not bool(ant_to_anaph):
+    global ant_to_end_c
+    if not bool(ant_to_end_c):
         return txt
 
-    ant, to_add = get_max_i(ant_to_anaph)
+    ant, to_add = get_max_i()
     while to_add is not None:
         bef = txt[:to_add]
         aft = txt[to_add:]
         txt = f"{bef}({ant}) {aft}"
-        ant, to_add = get_max_i(ant_to_anaph)
+        ant, to_add = get_max_i()
     return txt
 
 
@@ -69,5 +71,5 @@ We have examined the effect of leukotriene B4 (LTB4), a potent lipid proinflamma
 
     doc = load_model(input_)
     ant_to_end_c = ants_anaph_end_char(doc)
-    annotated_txt = annotate_txt(doc.text, ant_to_end_c)
+    annotated_txt = annotate_txt(doc.text)
     print(annotated_txt)
