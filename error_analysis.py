@@ -7,7 +7,7 @@ from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, 
 from utils import get_random_batch, get_str_from_file
 
 # modify model and codes used here
-MODEL = 'en_core_web_md'
+MODEL = 'en_core_sci_md'
 ####
 
 ####
