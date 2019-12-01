@@ -33,7 +33,7 @@ def commutative_pairing(cluster_list):
     """
     assert type(cluster_list) == list  # quick type check
 
-    return [ (cluster_list[0], cluster_list[i]) for i in range(1, len(cluster_list)) ]
+    return [(cluster_list[0], cluster_list[i]) for i in range(1, len(cluster_list))
 
 
 def word_to_char_indices(words_pair, container_text):
@@ -313,7 +313,6 @@ def cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=False):
 
     false_negs = len(gold_clusters.difference(pred_cl_copy))
     pos_neg_dict['false_neg'] += false_negs
-
 
     return pos_neg_dict
 # ------------------------------------------------------------------
