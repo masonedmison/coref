@@ -33,7 +33,7 @@ def commutative_pairing(cluster_list):
     """
     assert type(cluster_list) == list  # quick type check
 
-    return [(cluster_list[0], cluster_list[i]) for i in range(1, len(cluster_list))
+    return [(cluster_list[0], cluster_list[i]) for i in range(1, len(cluster_list))]
 
 
 def word_to_char_indices(words_pair, container_text):
@@ -50,7 +50,7 @@ def word_to_char_indices(words_pair, container_text):
     ant_span = span_(s_index_b, s_index_b+len(s_b_str))  # ant span
 
     s_e_str = words_pair[1].text
-    s_index_e =  words_pair[1].start_char
+    s_index_e = words_pair[1].start_char
     anaph_span = span_(s_index_e, s_index_e+len(s_e_str))  # anaph span
 
     return cluster(ant_span, anaph_span)
@@ -155,7 +155,7 @@ def get_coref_spans(a2_file):
             for lit2 in term_literals[anaph_s]:
                 if lit1.lower().strip() == lit2.lower().strip():
                     return True
-        return False            
+        return False
 
     if os.stat(a2_file).st_size == 0: return clusters, min_spans  # if file is empty return empty clusters and min_spans
 
@@ -209,8 +209,9 @@ def atom_link_detector(pred_cluster, gold_clusters):
     return False
 
 
-def within_min_span(pred_span, gold_span, min_spans):
-    """Detect if predicited mention span meets the 'minumum span' len declared in annotated data
+def within_min_max_span(pred_span, gold_span, min_spans):
+    """Detect if predicted mention span meets the 'minumum span' len declared
+    in annotated data or if pred span encapsulates gold span
     Args:
         pred_span: predicted span
         gold_span: gold span in annotated data
@@ -218,15 +219,17 @@ def within_min_span(pred_span, gold_span, min_spans):
     Returns:
         True is span is within minimum span and False if not
     """
-
     m_span = min_spans[gold_span]
     if m_span is None:
         m_span = gold_span
-    # rules as defined in top level doc string
+    # check for min span coverage
     if pred_span.beg >= gold_span.beg and pred_span.end <= gold_span.end:
         if pred_span.beg <= m_span.beg and pred_span.end >= m_span.end:
             return True
-
+    # check if pred subsumes gold mention or contains it
+    if pred_span.beg <= gold_span.beg and pred_span.end >= gold_span.end:
+        return True
+    
     return False
 # ------------------------------------------------------------------------
 
@@ -272,7 +275,7 @@ def f1_(prec, rec):
 def min_span_bundle(pred_clust, gold_clusters, min_spans):
     """takes a single predicted cluster and checks if both clusters may exist within the minumum spans of all of the gold clusters"""
     for g_clust in gold_clusters:
-        if within_min_span(pred_clust.ant_span_, g_clust.ant_span_, min_spans) and within_min_span(pred_clust.anaph_span_, g_clust.anaph_span_, min_spans):
+        if within_min_max_span(pred_clust.ant_span_, g_clust.ant_span_, min_spans) and within_min_max_span(pred_clust.anaph_span_, g_clust.anaph_span_, min_spans):
             return g_clust
     return None
 

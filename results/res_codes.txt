@@ -13,5 +13,8 @@ Predicted duplicate literal forms pruned: plfp
 Gold duplicate literal forms pruned (max span only): glfpma
 Gold duplicate literal forms pruned (max&min span): glfpmami
 
+[SPANS]
+allow pred cluster overlap of gold cluster: pco
+
 [Link Distribution]
 atom links in gold clusters: alg

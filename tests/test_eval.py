@@ -4,7 +4,7 @@ import pytest
 import spacy
 import neuralcoref
 from bionlp_eval import (commutative_pairing, word_to_char_indices, cluster, span_, get_coref_spans,
-coref_clusters_to_spans, atom_link_detector, within_min_span, cluster_comparison)
+coref_clusters_to_spans, atom_link_detector, cluster_comparison, within_min_max_span)
 
 MODEL = 'en_core_web_md'  # change model as desired here
 
@@ -127,6 +127,16 @@ def test_min_spans():
     assert min_spans[ws5] is None  # test for term with no min span
 
 
+def test_within_min_max():
+    print('\n------testing gold_mention subsumption-------')
+    
+    pm1 = span_(100, 200)
+    gm1 = span_(110, 180)
+    min_spans = dict()
+    min_spans[gm1] = None
+
+    assert within_min_max_span(pm1, gm1, min_spans) is True
+
 def test_atom_link():
     print('\n---------testing atom link detection-----------')
     # surface links
@@ -187,7 +197,7 @@ p_span10 = span_(400, 402)  # none
 
 def test_min_span_detecting():
     print('\n------------testing min span detection-----------------')
-    wms = partial(within_min_span, gold_span=g_span1, min_spans=min_spans)
+    wms = partial(within_min_max_span, gold_span=g_span1, min_spans=min_spans)
 
     assert wms(p_span1) is True
     assert wms(p_span2) is True
