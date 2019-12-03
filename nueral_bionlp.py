@@ -7,7 +7,7 @@ import neuralcoref
 from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, cluster_comparison, f1_, precision, recall)
 
 # modify model and codes used here
-MODEL = 'en_core_sci_lg'
+MODEL = 'en_core_web_md'
 CODES = 'alg_plfp_glfpma'  # seperated by '_' -- see results/res_codes.txt
 ####
 
