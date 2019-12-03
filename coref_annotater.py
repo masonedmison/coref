@@ -65,8 +65,7 @@ if __name__ == '__main__':
 # test path -- /home/medmison690/pyprojects/coref/eval_data/train/PMID-1618911.txt
 
     doc = load_model(input_)
-    # ant_to_end_c = ants_anaph_end_char(doc, prune_same_lit=args.prune_same_lit)
-    ant_to_end_c = ants_anaph_end_char(doc)
+    ant_to_end_c = ants_anaph_end_char(doc, prune_same_lit=args.prune_same_lit)
     annotated_txt = annotate_txt(doc.text)
 
     print(annotated_txt)
