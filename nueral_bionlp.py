@@ -8,7 +8,7 @@ from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, 
 
 # modify model and codes used here
 MODEL = 'en_core_sci_md'
-CODES = 'alg_plfp_glfpma_pco_bwv'  # seperated by '_' -- see results/res_codes.txt
+CODES = 'alg_plfp_glfpma_pco'  # seperated by '_' -- see results/res_codes.txt
 ####
 
 ####
@@ -16,7 +16,7 @@ CODES = 'alg_plfp_glfpma_pco_bwv'  # seperated by '_' -- see results/res_codes.t
 nlp = spacy.load(MODEL)
 # nlp.add_pipe(nlp.create_pipe('sentencizer'))
 ####
-neuralcoref.add_to_pipe(nlp)
+# neuralcoref.add_to_pipe(nlp)
 
 
 def get_txt_files(path_to_files):
@@ -24,7 +24,7 @@ def get_txt_files(path_to_files):
     return glob.iglob(os.path.join(path_to_files, '*.txt'))
 
 
-def calculate_metrics(pos_neg_dict, pred_gold_totals, write_res=False):
+def calculate_metrics(pos_neg_dict, pred_gold_totals, greedyness=0.5, write_res=False):
     """calculates metrics and writes to txt file"""
     tp = pos_neg_dict['true_pos']
     fp = pos_neg_dict['false_pos']
@@ -36,11 +36,11 @@ def calculate_metrics(pos_neg_dict, pred_gold_totals, write_res=False):
     f1 = f1_(prec, rec)
 
     if write_res:
-        write_results(f1, prec, rec, pred_gold_totals, pos_neg_dict)
+        write_results(f1, prec, rec, pred_gold_totals, pos_neg_dict, greedyness=greedyness)
 
 
-def write_results(f1, precision, recall, pred_gold_totals, pos_neg_dict):
-    with open(f'{MODEL}_{CODES}.txt', 'w') as out:
+def write_results(f1, precision, recall, pred_gold_totals, pos_neg_dict, greedyness=0.5):
+    with open(f'{MODEL}_{CODES}_g={str(greedyness)}.txt', 'w') as out:
         out.write('[ACCURACY METRICS]')
         out.write(f'\n[F1] {f1*100}%')
         out.write(f'\n[PRECISION] {precision*100}%')
@@ -53,7 +53,7 @@ def write_results(f1, precision, recall, pred_gold_totals, pos_neg_dict):
         out.write(f'\n[FALSE NEGATIVES] {pos_neg_dict["false_neg"]}')
 
 
-def process_txt_files(txt_files):
+def process_txt_files(txt_files, greedyness=0.5):
     """takes an iterable containing paths txt files"""
     total_pred = 0
     total_gold = 0
@@ -81,12 +81,7 @@ def process_txt_files(txt_files):
         ####
         logging.info(f'[FINISHED PROCESSING FILE] {f}')
     pred_gold_totals = (total_pred, total_gold)
-    calculate_metrics(pos_neg_dict, pred_gold_totals, write_res=True)
-
-
-def main():
-    txt_it = get_txt_files('eval_data/train')  # iterator over all txt files in dir
-    process_txt_files(txt_it)
+    calculate_metrics(pos_neg_dict, pred_gold_totals, greedyness=greedyness, write_res=True)
 
 
 if __name__ == '__main__':
@@ -99,4 +94,7 @@ if __name__ == '__main__':
     logger = logging.getLogger('bionlp_eval')
     logger.setLevel(logging.DEBUG)
 
-    main()
+    greedyness = .7
+    txt_it = get_txt_files('eval_data/train')  # iterator over all txt files in dir
+    neuralcoref.add_to_pipe(nlp, greedyness=greedyness)
+    process_txt_files(txt_it, greedyness=greedyness)

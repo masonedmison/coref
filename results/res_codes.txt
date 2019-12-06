@@ -17,7 +17,10 @@ Gold duplicate literal forms pruned (max&min span): glfpmami
 allow pred cluster overlap of gold cluster: pco
 
 [Vectors]
-bwv
+bwv = 50dim BioWordVec word vectors (trained on pubmed and mesh data)
+
+[Params]
+g=0<n<1 = greedyness parameter value -- if not specified assume value of 0.5
 
 
 [Link Distribution]

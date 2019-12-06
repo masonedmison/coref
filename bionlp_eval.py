@@ -256,7 +256,10 @@ def recall(true_pos, false_neg):
     Returns:
         recall metric score
     """
-    return true_pos/(true_pos+false_neg)
+    div = true_pos + false_neg
+    if div == 0:
+        return div
+    return true_pos/(div)
 
 
 def f1_(prec, rec):
@@ -267,7 +270,10 @@ def f1_(prec, rec):
     Returns:
         f1_ metric score
     """
-    return 2 * ((prec*rec)/(prec+rec))
+    div = prec + rec
+    if div == 0:
+        return div
+    return 2 * ((prec*rec)/div)
 # ------------------------------------------------------------------
 
 

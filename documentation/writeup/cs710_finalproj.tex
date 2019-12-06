@@ -1,0 +1,72 @@
+
+\documentclass[11pt]{article}
+\usepackage[margin = 1in]{geometry}
+\usepackage[none]{hyphenat}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+
+
+
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[L]{\slshape \MakeUppercase{Term Project Proposal}}
+\fancyhead[R]{\slshape Mason Edmison}
+\fancyfoot[C]{\thepage}
+
+%%%%
+% hack to remove indent
+\newlength\tindent
+\setlength{\tindent}{\parindent}
+\setlength{\parindent}{0pt}
+\renewcommand{\indent}{\hspace*{\tindent}}
+%%%%
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+\Large{\textbf{Term Project Proposal}} \\
+\Large{\textbf{CS 710 - Artificial Intelligence}} \\
+
+\vfill
+\line(1,0){400} \\
+
+\Large{\textbf{Coreference Resolution in Biomedical Text:}} \\
+\Large{\textbf{Improving Performance with Ontologies and Domain Specific NER}} \\
+
+\line(1,0){400}\\
+\vfill
+Mason Edmison\\
+University of Wisconsin-Milwaukee\\
+10/25/2019
+\end{center}
+\end{titlepage}
+
+\section{Introduction}
+
+
+\section{Dataset and Evaluation}
+Due to limited resources and time, I will not be able to train the coreference systems used and will use the pre-trained models\footnote{Both systems, \emph{deep coref} and \emph{neural coref} ship pre-trained on the CoNLL 2012 dataset}. For evaluating the  coref system, I will use the training dataset from the task Protein Coreference at BioNLP 2011. I will evaluate the system on both mention detection as well as mention linking to produce coreference links using the harmonic mean \emph{F1} as the determining metric. 
+
+\section{Performance}
+\begin{center}
+ \begin{tabular}{||c c c c||} 
+ \hline
+  &  Prec.  & Rec. & $F1$ \\ [0.5ex] 
+ \hline\hline
+     SpaCy Web Md & 15.15\% & 8.37\% & 10.72\% \\ 
+ \hline
+\end{tabular}
+\end{center}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{References}
+
+\nocite{pilehvar-collier-2016-improved, choi-etal-2014-analysis, Prokofyev:2015:SOC:2942298.2942337, 95e005df001d47be8468f24479845109,clark-manning-2016-improving}
+
+\end{document} % end document

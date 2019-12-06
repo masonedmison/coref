@@ -11,12 +11,9 @@ MODEL = 'en_core_sci_md'
 ####
 
 ####
-# change model as needed
 nlp = spacy.load(MODEL)
 # nlp.add_pipe(nlp.create_pipe('sentencizer'))
 ####
-coref = neuralcoref.NeuralCoref(nlp.vocab)
-nlp.add_pipe(coref, name='neuralcoref')
 
 f_batch = get_random_batch(n=20)
 
@@ -76,4 +73,5 @@ def get_lit_forms(clusters, container_text):
 
 
 if __name__ == '__main__':
+    neuralcoref.add_to_pipe(nlp)
     process_txt_files(f_batch)

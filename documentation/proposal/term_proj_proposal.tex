@@ -1,0 +1,81 @@
+\documentclass[11pt]{article}
+\usepackage[margin = 1in]{geometry}
+\usepackage[none]{hyphenat}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+
+
+
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[L]{\slshape \MakeUppercase{Term Project Proposal}}
+\fancyhead[R]{\slshape Mason Edmison}
+\fancyfoot[C]{\thepage}
+
+%%%%
+% hack to remove indent
+\newlength\tindent
+\setlength{\tindent}{\parindent}
+\setlength{\parindent}{0pt}
+\renewcommand{\indent}{\hspace*{\tindent}}
+%%%%
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+\Large{\textbf{Term Project Proposal}} \\
+\Large{\textbf{CS 710 - Artificial Intelligence}} \\
+
+\vfill
+\line(1,0){400} \\
+
+\Large{\textbf{Coreference Resolution in Biomedical Text:}} \\
+\Large{\textbf{Improving Performance with Ontologies and Domain Specific NER}} \\
+
+\line(1,0){400}\\
+\vfill
+Mason Edmison\\
+University of Wisconsin-Milwaukee\\
+10/25/2019
+\end{center}
+\end{titlepage}
+
+\section{Topic}
+For my term project, I would like to investigate coreference resolution in biomedical text. Coreference resolution is an essential task in information extraction, because it can automatically provide links between entities as well as facilitate better indexing for medical information search with semantic information \cite{choi-etal-2014-analysis}. While there are several open-source coreference resolution systems available, these systems tend to perform quite poorly on domain specific-text \cite{choi-etal-2014-analysis}. One of the most prominent of the open-source options available is \emph{neural coref} - available as a Python library. This system is modeled after the nueral network based coreference system presented by Clark and Manning in 2016\footnote{\emph{Deep coref}, the model discussed in these papers, can be found at \texttt{https://github.com/clarkkev/deep-coref}} in the papers \emph{Deep Reinforcement Learning for Mention-Ranking Coreference Models} \cite{clark-manning-2016-deep} and \emph{Improving Coreference Resolution by Learning Entity-Level Distributed Representations} \cite{clark-manning-2016-improving}. \\
+
+I want to explore off-the-shelf coreference resolution systems and see what gains in performance can be made when introducing biomedical specific word-embeddings, named-entity recognition models, and ontologies.
+
+\section{Plan}
+Throughout this project I will assume the generic coreference resolution algorithm \cite{ng_2003} proposed by Ng.: 
+\begin{enumerate}
+\item \textbf{Identification of referring expressions}
+\item \textbf{Characterization of referring expressions}
+\item \textbf{Anaphoricity determination}
+\item \textbf{Generation of antecedent candidates}
+\item \textbf{Filtering}
+\item \textbf{Scoring/ Ranking}
+\item \textbf{Searching/ Clustering}
+\end{enumerate}
+
+The low scores\footnote{Scores or metrics reported vary, but a few of the commonly used are F1, MUC, $B^3$, Entity-Based CEAF. } reported on biomedical text \cite{choi-etal-2014-analysis} can partially be accounted for the fact that these models use non-domain specific word embeddings and named-entity recognition models. As illustrated in Choi et al., results greatly improve when introducing domain-specific NER in coference resolution systems. Luckily for us, there exists pre-trained biomedical word-vectors \emph{and} NER models trained on biomedical corpora, respectively \emph{BioWordVec} and \emph{SciSpacy}.  \\
+
+Furthermore, performance of coreference resolution systems have shown to improve when introducing ontologies within the \emph{searching/clustering} step of the generic coreference algorithm \cite{Prokofyev:2015:SOC:2942298.2942337}. Specifically, I plan to introduce the the MeSH and Uniprot ontologies in the pre-proccessing of text input\footnote{One option, albeit obtrusive, would be to normalize the text where each synonym is changed to it's preferred label.} or during the final step ( \textbf{step 7}) of the  algorithm.  
+
+\section{Dataset and Evaluation}
+Due to limited resources and time, I will not be able to train the coreference systems used and will use the pre-trained models\footnote{Both systems, \emph{deep coref} and \emph{neural coref} ship pre-trained on the CoNLL 2012 dataset}. For evaluating the  coref system, I will use the training dataset from the task Protein Coreference at BioNLP 2011. I will evaluate the system on both mention detection as well as mention linking to produce coreference links using the harmonic mean \emph{F1} as the determining metric. 
+
+\section{Aspects of AI Involved}
+The aspects of AI involved in this project are: natural language processing, neural networks or more broadly deep learning, knowledge representation (ontologies and biomedical knowledge bases). 
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{References}
+
+\nocite{pilehvar-collier-2016-improved, choi-etal-2014-analysis, Prokofyev:2015:SOC:2942298.2942337, 95e005df001d47be8468f24479845109,clark-manning-2016-improving}
+
+\end{document} % end document
