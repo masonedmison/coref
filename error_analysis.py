@@ -7,7 +7,8 @@ from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, 
 from utils import get_random_batch, get_str_from_file
 
 # modify model and codes used here
-MODEL = 'en_core_sci_md'
+MODEL = 'ner_models/jnlpba_ner'
+prune_by_ner = {'DNA', 'RNA', 'PROTEIN'}
 ####
 
 ####
@@ -34,7 +35,8 @@ def process_txt_files(txt_files):
         ####
         # funky bug where files with 1 line throw a TypeError
         try:
-            nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text) # neural coref
+            nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text,
+                    prune_by_ner=prune_by_ner) # neural coref
             a2_f = get_a2_file(f)  # get corresponding annotated file 
             gold_clusts, min_spans = get_coref_spans(a2_f)  # bionlp
         except TypeError as te:

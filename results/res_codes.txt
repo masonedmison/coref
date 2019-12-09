@@ -8,10 +8,11 @@ results files are in the form of:
 -- multiple codes are seperated by '_'
 
 [Codes]
-[Duplicate Literal Forms]
+[Pruning]
 Predicted duplicate literal forms pruned: plfp
 Gold duplicate literal forms pruned (max span only): glfpma
 Gold duplicate literal forms pruned (max&min span): glfpmami
+prune by ner: pner
 
 [Spans]
 allow pred cluster overlap of gold cluster: pco

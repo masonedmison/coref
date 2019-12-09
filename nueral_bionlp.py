@@ -7,8 +7,10 @@ import neuralcoref
 from bionlp_eval import (coref_clusters_to_spans, get_a2_file, get_coref_spans, cluster_comparison, f1_, precision, recall)
 
 # modify model and codes used here
-MODEL = 'en_core_sci_md'
-CODES = 'alg_plfp_glfpma_pco'  # seperated by '_' -- see results/res_codes.txt
+MODEL = 'ner_models/jnlpba_ner'
+NER_MOD_TO_COMBINE = 'en_ner_craft_md'
+CODES = 'alg_plfp_glfpma_pco_pner'  # seperated by '_' -- see results/res_codes.txt
+prune_by_ner = {'DNA', 'RNA', 'PROTEIN', 'CELL_TYPE'}
 ####
 
 ####
@@ -52,8 +54,8 @@ def write_results(f1, precision, recall, pred_gold_totals, pos_neg_dict, greedyn
         out.write(f'\n[FALSE POSITIVES] {pos_neg_dict["false_pos"]}') 
         out.write(f'\n[FALSE NEGATIVES] {pos_neg_dict["false_neg"]}')
 
-
-def process_txt_files(txt_files, greedyness=0.5):
+# 'DNA', 'CELL_TYPE', 'CELL_LINE', 'RNA', 'PROTEIN'
+def process_txt_files(txt_files, greedyness=0.5, prune_by_ner=None):
     """takes an iterable containing paths txt files"""
     total_pred = 0
     total_gold = 0
@@ -65,7 +67,8 @@ def process_txt_files(txt_files, greedyness=0.5):
         doc = nlp(f_str)
         # funky bug where files with 1 line throw a TypeError
         try:
-            nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text) # neural coref
+            nc_clusts = coref_clusters_to_spans(doc._.coref_clusters, doc.text,
+                prune_by_ner=prune_by_ner) # neural coref pred clusts
             a2_f = get_a2_file(f)  # get corresponding annotated file 
             gold_clusts, min_spans = get_coref_spans(a2_f)  # bionlp
         except TypeError as te:
@@ -94,7 +97,7 @@ if __name__ == '__main__':
     logger = logging.getLogger('bionlp_eval')
     logger.setLevel(logging.DEBUG)
 
-    greedyness = .7
+    greedyness = .5
     txt_it = get_txt_files('eval_data/train')  # iterator over all txt files in dir
     neuralcoref.add_to_pipe(nlp, greedyness=greedyness)
-    process_txt_files(txt_it, greedyness=greedyness)
+    process_txt_files(txt_it, greedyness=greedyness, prune_by_ner=prune_by_ner)

@@ -11,6 +11,7 @@ from collections import namedtuple, defaultdict
 import re
 import pathlib
 import os
+from utils import prune_by_ent
 
 
 # -----------------named tuples--------------------------------
@@ -71,7 +72,7 @@ def prune_same_form(clusts):
     return prune_copy
 
 
-def coref_clusters_to_spans(coref_clusts, container_text):
+def coref_clusters_to_spans(coref_clusts, container_text, prune_by_ner=None):
     """"Takes list of cluster objects and returns a list of cluster namedtuple objects where memebers are span_ objects
     Note that this function more or less iterates over the coref_cluster object and passses each cluster through commutative pairing and word_to_char indices
     Args:
@@ -83,7 +84,11 @@ def coref_clusters_to_spans(coref_clusts, container_text):
     char_span_clusters = set()
     for cl_d in coref_clusts:
         cp = commutative_pairing(cl_d.mentions)
+        # pruning time
+        if prune_by_ner is not None:
+            cp = prune_by_ent(cp, prune_by_ner)
         cp = prune_same_form(cp)  # prune list of all mentions that are of same form
+        ###
         for c in cp:
             char_span_cl = word_to_char_indices(c, container_text)
             char_span_clusters.add(char_span_cl)
