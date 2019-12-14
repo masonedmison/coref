@@ -24,3 +24,24 @@ def get_str_from_file(file_):
     f_str = f_r.read() 
     f_r.close()
     return (f_name, f_str)
+
+
+def ment_in_set(ment, lits_set):
+    """return True if a entity literal is contained in mention"""
+    for lit in lits_set:
+        if lit in ment:
+            return True
+    return False
+
+
+def list_in_set(mentions_l, rel_terms):
+    one = False
+    for ment in mentions_l:
+        ment_clean = ment.text.lower().strip()
+        if ment_in_set(ment_clean, rel_terms):
+            one = True
+            break
+    if one:
+        return mentions_l
+    else:
+        return list()

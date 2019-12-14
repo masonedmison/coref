@@ -1,4 +1,5 @@
 venv/
+env/
 isolate.py
 models/
 neuralcoref/

@@ -23,7 +23,6 @@ f_batch = get_random_batch(n=20)
 # xlsx workbook
 writer = pd.ExcelWriter(f'results/error_analysis/EA_{datetime.now()}.xlsx', engine='xlsxwriter')
 
-
 def process_txt_files(txt_files):
     """takes an iterable containing paths txt files"""
     for f in txt_files:

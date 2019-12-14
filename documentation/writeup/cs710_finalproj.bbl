@@ -1,0 +1,41 @@
+\begin{thebibliography}{1}
+
+\bibitem{95e005df001d47be8468f24479845109}
+Mercedes {Arguello Casteleiro}, George Demetriou, Warren Read, {Maria Jesus}
+  {Fernandez Prieto}, Nava Maroto, Diego {Maseda Fernandez}, Goran Nenadic,
+  Julie Klein, John Keane, and Robert Stevens.
+\newblock Deep learning meets ontologies: experiments to anchor the
+  cardiovascular disease ontology in the biomedical literature.
+\newblock {\em Biomedical Semantics}, 9(13), 2018.
+
+\bibitem{choi-etal-2014-analysis}
+Miji Choi, Karin Verspoor, and Justin Zobel.
+\newblock Analysis of coreference relations in the biomedical literature.
+\newblock In {\em Proceedings of the Australasian Language Technology
+  Association Workshop 2014}, pages 134--138, Melbourne, Australia, November
+  2014.
+
+\bibitem{clark-manning-2016-improving}
+Kevin Clark and Christopher~D. Manning.
+\newblock Improving coreference resolution by learning entity-level distributed
+  representations.
+\newblock In {\em Proceedings of the 54th Annual Meeting of the Association for
+  Computational Linguistics (Volume 1: Long Papers)}, pages 643--653, Berlin,
+  Germany, August 2016. Association for Computational Linguistics.
+
+\bibitem{pilehvar-collier-2016-improved}
+Mohammad~Taher Pilehvar and Nigel Collier.
+\newblock Improved semantic representation for domain-specific entities.
+\newblock In {\em Proceedings of the 15th Workshop on Biomedical Natural
+  Language Processing}, pages 12--16, Berlin, Germany, August 2016. Association
+  for Computational Linguistics.
+
+\bibitem{Prokofyev:2015:SOC:2942298.2942337}
+Roman Prokofyev, Alberto Tonon, Michael Luggen, Loic Vouilloz, Djellel~Eddine
+  Difallah, and Philippe Cudr{\'e}-Mauroux.
+\newblock Sanaphor: Ontology-based coreference resolution.
+\newblock In {\em Proceedings of the 14th International Conference on The
+  Semantic Web - ISWC 2015 - Volume 9366}, pages 458--473, Berlin, Heidelberg,
+  2015. Springer-Verlag.
+
+\end{thebibliography}
