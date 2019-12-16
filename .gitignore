@@ -9,3 +9,5 @@ spacy_explore.py
 .pytest_cache/v/pytest_cache/
 .vscode/
 __pycache__/
+.idea
+.pytest_cache/
