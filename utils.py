@@ -35,6 +35,8 @@ def ment_in_set(ment, lits_set):
 
 
 def list_in_set(mentions_l, rel_terms):
+    """Check that at least one relevant term (from termite) exists within a cluster and return list 
+    if so, else return an empty list"""
     one = False
     for ment in mentions_l:
         ment_clean = ment.text.lower().strip()
