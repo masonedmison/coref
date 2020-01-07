@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.10.27)  14 DEC 2019 14:38
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.10.27)  18 DEC 2019 18:13
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -196,6 +196,10 @@ File: ./images/coref_vis.png Graphic file (type png)
 Package pdftex.def Info: ./images/coref_vis.png  used on input line 57.
 (pdftex.def)             Requested size: 227.62204pt x 65.56653pt.
 
+Underfull \hbox (badness 10000) in paragraph at lines 75--76
+
+ []
+
 
 Package Fancyhdr Warning: \headheight is too small (12.0pt): 
  Make it at least 13.59999pt.
@@ -203,68 +207,102 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
  This may cause the page layout to be inconsistent, however.
 
 [1 <./images/coref_vis.png>]
-Overfull \hbox (5.11057pt too wide) in paragraph at lines 77--78
-[]\OT1/cmr/m/n/10.95 Specifically, this sys-tem is a deep neu-ral net-work that learns dis-tributed rep-re-sen-ta-tions of coref-er-ence
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 77--78
+Underfull \hbox (badness 10000) in paragraph at lines 78--81
 
  []
 
 <./images/deepneural.png, id=18, 529.98pt x 233.87375pt>
 File: ./images/deepneural.png Graphic file (type png)
 <use ./images/deepneural.png>
-Package pdftex.def Info: ./images/deepneural.png  used on input line 80.
+Package pdftex.def Info: ./images/deepneural.png  used on input line 83.
 (pdftex.def)             Requested size: 227.62204pt x 100.44597pt.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 86.
+(Font)              <10.95> on input line 89.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 86.
+(Font)              <8> on input line 89.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 86.
+(Font)              <6> on input line 89.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 86.
+(Font)              <9> on input line 89.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 86.
-Missing character: There is no â in font cmr10!
-Missing character: There is no € in font cmr10!
-Missing character: There is no ™ in font cmr10!
-Missing character: There is no â in font cmr10!
-Missing character: There is no € in font cmr10!
-Missing character: There is no ˜ in font cmr10!
-Missing character: There is no â in font cmr10!
-Missing character: There is no € in font cmr10!
-Missing character: There is no ™ in font cmr10!
+(Font)              <5> on input line 89.
+
+Underfull \hbox (badness 10000) in paragraph at lines 89--90
+
+ []
+
 [2 <./images/deepneural.png>]
 Missing character: There is no â in font cmr10!
 Missing character: There is no € in font cmr10!
-Missing character: There is no “ in font cmr10!
-Missing character: There is no â in font cmr10!
-Missing character: There is no € in font cmr10!
 Missing character: There is no ˜ in font cmr10!
 Missing character: There is no â in font cmr10!
 Missing character: There is no € in font cmr10!
 Missing character: There is no ™ in font cmr10!
- [3] (./cs710_finalproj.bbl
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 111.
+ (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 111.
+
+Overfull \hbox (3.43759pt too wide) in paragraph at lines 111--112
+[]\OT1/cmr/m/n/10.95 Word Vec-tors: BioWord-Vec - 200 di-men-sion word vec-tors trained us-ing a Fast-text vec-tor-iza-tion
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--117
+[][]\OT1/cmr/m/n/9 The forked neu-ral-coref repo with these mod-i-fi-ca-tions can be found at
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
+
+ []
+
+[3]
+Underfull \hbox (badness 10000) in paragraph at lines 119--120
+
+ []
+
+<./images/highest_prec.png, id=32, 243.91125pt x 179.67125pt>
+File: ./images/highest_prec.png Graphic file (type png)
+<use ./images/highest_prec.png>
+Package pdftex.def Info: ./images/highest_prec.png  used on input line 126.
+(pdftex.def)             Requested size: 113.81102pt x 83.83685pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 146--147
+
+ []
+
+[4 <./images/highest_prec.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 149--150
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 152--154
+
+ []
+
+[5] (./cs710_finalproj.bbl
 Underfull \hbox (badness 1565) in paragraph at lines 19--24
 []\OT1/cmr/m/n/10.95 Mohammad Taher Pile-hvar and Nigel Col-lier.  Im-proved se-man-tic rep-re-sen-ta-tion for
  []
 
-) [4] (./cs710_finalproj.aux) ) 
+) [6] (./cs710_finalproj.aux) ) 
 Here is how much of TeX's memory you used:
- 2174 strings out of 492982
- 31030 string characters out of 6134895
- 98502 words of memory out of 5000000
- 5716 multiletter control sequences out of 15000+600000
+ 2202 strings out of 492982
+ 31545 string characters out of 6134895
+ 99526 words of memory out of 5000000
+ 5740 multiletter control sequences out of 15000+600000
  9853 words of font info for 34 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,10n,43p,896b,218s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb>
-Output written on cs710_finalproj.pdf (5 pages, 185924 bytes).
+ 41i,10n,43p,1212b,218s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb>
+Output written on cs710_finalproj.pdf (7 pages, 223349 bytes).
 PDF statistics:
- 69 PDF objects out of 1000 (max. 8388607)
- 46 compressed objects within 1 object stream
+ 87 PDF objects out of 1000 (max. 8388607)
+ 58 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 11 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
