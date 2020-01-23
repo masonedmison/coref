@@ -295,17 +295,14 @@ def cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=False):
     for pred_clust in pred_clusters:
         if pred_clust in gold_clusters:
             pos_neg_dict['true_pos'] += 1
-            continue
         # minimum span check
-        min_span_ex = min_span_bundle(pred_clust, gold_clusters, min_spans)
-        if min_span_ex is not None:
+        elif min_span_bundle(pred_clust, gold_clusters, min_spans) is not None:
+            min_span_ex = min_span_bundle(pred_clust, gold_clusters, min_spans)
             pos_neg_dict['true_pos'] += 1
             pred_cl_copy.remove(pred_clust)  # remove partial match and add gold clust matched on - we do this so we can do set difference for false positives
             pred_cl_copy.add(min_span_ex)
-            continue  # kick out so we don't run atom_link_detection
         # atom link detection
-        has_atom_link = atom_link_detector(pred_clust, gold_clusters)
-        if has_atom_link:
+        elif atom_link_detector(pred_clust, gold_clusters):
             pos_neg_dict['true_pos'] += 1
             pos_neg_dict['false_neg'] -= 1  # blindly subtract one since atom link will not be considered in difference of gold and pred sets
         else:  # no exact or partial match so false positive
@@ -313,7 +310,6 @@ def cluster_comparison(pred_clusters, gold_clusters, min_spans, debug=False):
 
     false_negs = len(gold_clusters.difference(pred_cl_copy))
     pos_neg_dict['false_neg'] += false_negs
-
 
     return pos_neg_dict
 # ------------------------------------------------------------------

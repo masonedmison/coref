@@ -6,6 +6,7 @@ import pathlib
 
 EVAL_DATA_PATH = "eval_data/train"  # assumes you have data stored in this dir 
 
+
 def get_random_batch(n=10):
     """get n number of random text files from BioNlP eval data"""
     all_txt = glob.glob(f'{EVAL_DATA_PATH}/*.txt')
@@ -47,3 +48,13 @@ def list_in_set(mentions_l, rel_terms):
         return mentions_l
     else:
         return list()
+
+
+def nc_to_conll(coref_clusts, termite_anns):
+    """convert neuralcoref clusters to a tabular conll format sorted by mention index"""
+    pass
+
+
+def termite_to_conll(termite_res):
+    """convert termite xml results to a tabluar conll file sorted by mention index"""
+    pass
